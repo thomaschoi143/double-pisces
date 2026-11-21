@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#FFF8F4">
-<title>Double Pisces</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23FFF8F4'/%3E%3Cpath d='M50.5 14.5A26 26 0 1 0 56.6 26' fill='none' stroke='%231E1A1C' stroke-width='3' stroke-linecap='round'/%3E%3Cg transform='translate(30 24.5) rotate(-24) scale(.64)'%3E%3Cpath d='M-15 0C-9-6.5 7-7 14-1.2C15-.4 15 .4 14 1.2C7 7-9 6.5-15 0ZM-14 0L-21-5.5C-19.5-2-19.5 2-21 5.5Z' fill='%231E1A1C'/%3E%3C/g%3E%3Cg transform='translate(34 39.5) rotate(156) scale(.64)'%3E%3Cpath d='M-15 0C-9-6.5 7-7 14-1.2C15-.4 15 .4 14 1.2C7 7-9 6.5-15 0ZM-14 0L-21-5.5C-19.5-2-19.5 2-21 5.5Z' fill='%23E8436E'/%3E%3C/g%3E%3C/svg%3E">
+<title>Double Pisces ♓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -71,11 +70,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    Splash
    ============================================================ */
 #splash{justify-content:center;align-items:center;text-align:center;padding:32px;background:radial-gradient(120% 80% at 50% 0%,#FFE6EE 0%,var(--bg) 60%)}
-.logo{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center}
-.logo .mark{width:96px;height:96px;color:var(--ink);animation:breathe 5s ease-in-out infinite}
-.logo .word{font-family:"Playfair Display",serif;font-size:clamp(26px,7.6vw,34px);font-weight:500;letter-spacing:.05em;white-space:nowrap;margin-top:18px;display:flex;align-items:center;gap:10px}
-.seal{display:inline-grid;place-items:center;width:22px;height:22px;background:#C8102E;color:#FFF8F4;border-radius:3px;font-size:9px;line-height:1;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;writing-mode:vertical-rl;letter-spacing:-.5px;transform:rotate(-3deg)}
-@keyframes breathe{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(8deg) scale(1.03)}}
+.logo{font-family:"Playfair Display",serif;font-size:clamp(34px,10.5vw,46px);white-space:nowrap;font-weight:700;letter-spacing:-1px;position:relative;z-index:1}
+.logo .fish{display:inline-block;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
 @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
 .tagline{color:var(--muted);margin:10px 0 40px;position:relative;z-index:1}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:16px 28px;border-radius:999px;font-weight:600;font-size:16px;transition:transform .15s ease,box-shadow .2s ease,opacity .2s}
@@ -90,8 +86,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    Discover (profile)
    ============================================================ */
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;position:relative;z-index:2;background:var(--bg)}
-.topbar .brand{font-family:"Playfair Display",serif;font-weight:500;font-size:21px;letter-spacing:.04em;display:flex;align-items:center;gap:8px}
-.topbar .brand .mark{width:28px;height:28px;color:var(--ink)}
+.topbar .brand{font-family:"Playfair Display",serif;font-weight:700;font-size:24px}
+.topbar .brand b{color:var(--rose)}
 .pill{font-size:12px;font-weight:600;padding:6px 10px;border-radius:999px;background:var(--blush);color:var(--rose-deep)}
 .feed{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 14px 120px;scroll-behavior:smooth}
 .profile{touch-action:pan-y;will-change:transform}
@@ -248,20 +244,12 @@ textarea.field{resize:none;min-height:90px}
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="mark" viewBox="0 0 64 64">
-    <path d="M50.5 14.5A26 26 0 1 0 56.6 26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" opacity=".9"/>
-    <path d="M52.4 19.8A26 26 0 0 0 50.5 14.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".45"/>
-    <g transform="translate(30 24.5) rotate(-24) scale(.64)"><path d="M-15 0C-9-6.5 7-7 14-1.2C15-.4 15 .4 14 1.2C7 7-9 6.5-15 0ZM-14 0L-21-5.5C-19.5-2-19.5 2-21 5.5Z" fill="currentColor"/></g>
-    <g transform="translate(34 39.5) rotate(156) scale(.64)"><path d="M-15 0C-9-6.5 7-7 14-1.2C15-.4 15 .4 14 1.2C7 7-9 6.5-15 0ZM-14 0L-21-5.5C-19.5-2-19.5 2-21 5.5Z" fill="var(--rose)"/></g>
-      </symbol>
-</svg>
 <div class="app" id="app">
 
   <!-- SPLASH -->
   <section class="screen active" id="splash">
     <div class="ambient" data-hearts="14"></div>
-    <div class="logo"><svg class="mark" role="img" aria-label="Double Pisces"><use href="#mark"/></svg><div class="word">Double Pisces <span class="seal">双魚</span></div></div>
+    <div class="logo">Double Pisces <span class="fish">♓</span></div>
     <div class="tagline">Where dreamers find each other.<br>Made for romantics, by romantics.</div>
     <button class="btn btn-primary" id="startBtn" style="position:relative;z-index:1">Find your match 💗</button>
     <div class="splash-foot">New profiles near you · Melbourne</div>
@@ -270,7 +258,7 @@ textarea.field{resize:none;min-height:90px}
   <!-- DISCOVER -->
   <section class="screen" id="discover">
     <div class="topbar">
-      <div class="brand"><svg class="mark" aria-hidden="true"><use href="#mark"/></svg>Double Pisces</div>
+      <div class="brand">Double Pisces <b>♓</b></div>
       <div class="pill">📍 Melbourne</div>
     </div>
     <div class="feed" id="feed"></div>
