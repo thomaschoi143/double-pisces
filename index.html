@@ -666,13 +666,15 @@ async function startChat(){
   if (A.activity === "Café date"){
     await him("A cosy café and a long chat 🍵 What are you having?");
     const d = await chips([
-      {label:"☕ Coffee", value:"Coffee"}, {label:"🫖 Chai latte", value:"Chai latte"}, {label:"🍵 Matcha", value:"Matcha"},
-      {label:"🍫 Hot choco", value:"Hot choco"}, {label:"✨ Something else…", custom:true},
-    ], {customPlaceholder:"e.g. bubble tea, hojicha, a cake…"});
+      {label:"☕ Good coffee", value:"Good coffee"}, {label:"🍵 Good matcha", value:"Good matcha"},
+      {label:"🥞 Good brunch", value:"Good brunch"}, {label:"✨ Something else…", custom:true},
+    ], {customPlaceholder:"e.g. bubble tea, a dessert café, bakery…"});
     A.detail = d.value; her(d.label);
-    await him(d.value === "Coffee"
-      ? "Coffee for you, chai latte for me ☕🫖 Different cups, perfect match."
-      : `${d.value} for you, and I'm getting the same so we can match 🥹`);
+    await him({
+      "Good coffee": "Good coffee for you, chai latte for me ☕🫖 Different cups, perfect match.",
+      "Good matcha": "Good matcha for both of us 🍵 Matching drinks, obviously.",
+      "Good brunch": "Brunch date 🥞 Slow, sunny, and way too many plates to share. I'm in.",
+    }[d.value] || `${d.value}? Perfect. I'll find the best spot 🥹`);
   }
   else if (A.activity === "Picnic"){
     await him("A picnic? Our favourite 🧺 Blanket, snacks, sunshine, Carlton Gardens. I'll pack everything.");
