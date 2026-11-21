@@ -327,17 +327,18 @@ const CONFIG = {
 };
 
 // Every profile is you, under a different name, showing a different (real) side of you.
-// Put your own photos in `src` (e.g. "img/me-coffee.jpg"); empty = cute gradient placeholder.
+// Put your own photos in `src` (e.g. "img/me-1.jpg"); empty = cute gradient placeholder.
 const PROFILES = [
   { name:"Thomas", emoji:"👨‍💻", sub:"Software Engineer · Melbourne",
     blocks:[
       {t:"photo", src:"", emoji:"👨‍💻", grad:"linear-gradient(160deg,#FFB3C7,#FF6F91 55%,#C94B7D)", cap:"Shipping features by day, thinking about you by night"},
-      {t:"prompt", q:"I go crazy for", a:"clean code, a perfect flat white, and you. Not in that order. You first."},
+      {t:"prompt", q:"I go crazy for", a:"clean code, a warm chai latte, and you. Not in that order. You first."},
       {t:"vitals"},
       {t:"lovelang"},
-      {t:"photo", src:"", emoji:"🌉", grad:"linear-gradient(160deg,#C9B6FF,#8F7CFF 60%,#5B4BD6)", cap:"Melbourne born-and-debugged"},
+      {t:"photo", src:"", emoji:"🌉", grad:"linear-gradient(160deg,#C9B6FF,#8F7CFF 60%,#5B4BD6)", cap:"Shot on 35mm, developed with love 🎞️"},
       {t:"prompt", q:"Together, we could", a:"push a lifetime of slow Sunday mornings to production. Zero downtime."},
-      {t:"prompt", q:"My most irrational fear", a:"a merge conflict on our anniversary."},
+      {t:"prompt", q:"We'll get along if", a:"you don't mind me stopping every five minutes to take your photo. Film for the memories, digital for the backup."},
+      {t:"prompt", q:"My most irrational fear", a:"a merge conflict on our anniversary. Or opening the film back by accident."},
     ]},
   { name:"Chong", emoji:"📋", sub:"ISTJ · The Planner · UniMelb grad",
     blocks:[
@@ -355,7 +356,7 @@ const PROFILES = [
       {t:"prompt", q:"My love language is", a:"accompanying you, always. Errands, adventures, lazy days: wherever you are is where I want to be."},
       {t:"prompt", q:"Let's stay up late and", a:"have deep idea conversations: big questions, wild theories, the universe, us. Until the sun comes up."},
       {t:"prompt", q:"A shower thought I recently had", a:"two Pisces = two fish swimming the same direction, forever."},
-      {t:"prompt", q:"Typical Sunday", a:"Botanic Gardens, holding hands, pretending I'm not tearing up at the sunset."},
+      {t:"prompt", q:"Typical Sunday", a:"Botanic Gardens with a matcha in one hand, a film camera in the other, and you as my favourite subject."},
     ]},
   { name:"CIC", emoji:"💌", sub:"Fluent in every love language", last:true,
     blocks:[
@@ -441,10 +442,11 @@ function blockHTML(b, i){
       return `<div class="card prompt"><div class="q">${esc(b.q)}</div><div class="a">${esc(b.a)}</div>${like}</div>`;
     case "vitals":
       return `<div class="card vitals">
-        <div class="row"><span class="chip">♓ Pisces</span><span class="chip">🧠 ISTJ</span><span class="chip">📍 Melbourne</span><span class="chip">🗣️ Love-language fluent</span></div>
+        <div class="row"><span class="chip">♓ Pisces</span><span class="chip">🧠 ISTJ</span><span class="chip">📍 Melbourne</span><span class="chip">🎞️ Film photography</span><span class="chip">📷 Digital photography</span><span class="chip">🗣️ Love-language fluent</span></div>
         <div class="line"><i>💼</i>Software Engineer</div>
         <div class="line"><i>🎓</i>The University of Melbourne</div>
         <div class="line"><i>🏠</i>Melbourne, VIC</div>
+        <div class="line"><i>📸</i>Interests: film &amp; digital photography, matcha, hot choco</div>
         <div class="line"><i>🔍</i>Looking for: you, specifically</div>
         <div class="line"><i>💍</i>Intentions: forever, with a well-documented plan</div>
       </div>`;
@@ -597,7 +599,7 @@ function prettyTime(t){ let [h,m]=t.split(":").map(Number); const ap=h>=12?"pm":
 
 function dateTimePicker(suggest){
   return new Promise(resolve => {
-    const times = [["☕ Morning","10:00"],["🥪 Lunch","12:30"],["🌅 Golden hour","17:30"],["🕯️ Dinner","19:00"],["🌙 Late","20:30"]];
+    const times = [["🍵 Morning","10:00"],["🥪 Lunch","12:30"],["🌅 Golden hour","17:30"],["🕯️ Dinner","19:00"],["🌙 Late","20:30"]];
     composer.innerHTML = `<div class="dt-grid">
         <div><label>Day</label><input class="field" type="date" id="d" min="${todayISO()}"></div>
         <div><label>Time</label><input class="field" type="time" id="t" value="${suggest}"></div>
@@ -623,7 +625,7 @@ function notesInput(){
   });
 }
 
-function activityLabel(){ return A.activity + (A.cuisine ? ` · ${A.cuisine}` : ""); }
+function activityLabel(){ return A.activity + (A.detail ? ` · ${A.detail}` : ""); }
 function ticketHTML(){
   return `<div class="ticket"><div class="top"><div class="k">Admit two · ${esc(A.with || CONFIG.hisAlias)} ♡ ${esc(CONFIG.herName)}</div><div class="t">Our date 💘</div></div>
     <div class="rows">
@@ -647,14 +649,31 @@ async function startChat(){
   await him(`Hi ${CONFIG.herName} 🥹 I was really hoping you'd like me back.`);
   await him("So… can I take you on a date? What sounds perfect to you?");
   const act = await chips([
-    {label:"☕ Coffee", value:"Coffee"},
+    {label:"🍵 Café date", value:"Café date"},
     {label:"🍝 Dinner", value:"Dinner"},
     {label:"🌳 Park & walk", value:"Park & walk"},
+    {label:"📸 Photo walk", value:"Photo walk"},
     {label:"✨ Something else…", custom:true},
   ], {customPlaceholder:"e.g. picnic, movie, beach, museum…"});
   A.activity = act.value; her(act.label);
 
-  if (A.activity === "Coffee") await him("A slow coffee and a long talk ☕ My favourite kind of morning.");
+  if (A.activity === "Café date"){
+    await him("A cosy café and a long chat 🍵 What are we sipping?");
+    const d = await chips([
+      {label:"🫖 Chai latte", value:"Chai latte"}, {label:"🍵 Matcha", value:"Matcha"},
+      {label:"🍫 Hot choco", value:"Hot choco"}, {label:"✨ Something else…", custom:true},
+    ], {customPlaceholder:"e.g. bubble tea, hojicha, a cake…"});
+    A.detail = d.value; her(d.label);
+    await him(`${d.value} for you, and I'm getting the same so we can match 🥹`);
+  }
+  else if (A.activity === "Photo walk"){
+    await him("Yesss 📸 Two cameras, one city, and I already know who my favourite subject is. What are we shooting on?");
+    const d = await chips([
+      {label:"🎞️ Film", value:"Film"}, {label:"📷 Digital", value:"Digital"}, {label:"🤝 Both!", value:"Film + digital"},
+    ]);
+    A.detail = d.value; her(d.label);
+    await him(d.value === "Digital" ? "Digital it is. Unlimited shots, unlimited photos of you 😌" : "I'll load a fresh roll just for us 🎞️💗");
+  }
   else if (A.activity === "Park & walk") await him("Holding hands, golden hour, nowhere to be 🌳🌅 Perfect.");
   else if (A.activity === "Dinner"){
     await him("Candlelight mode: activated 🕯️ What are you craving?");
@@ -663,12 +682,12 @@ async function startChat(){
       {label:"🍣 Japanese", value:"Japanese"}, {label:"🍝 Pasta", value:"Pasta"}, {label:"🍕 Pizza", value:"Pizza"},
       {label:"🥂 Fine dining", value:"Fine dining"}, {label:"✨ Something else…", custom:true},
     ], {customPlaceholder:"e.g. Vietnamese, hot pot, Mexican…"});
-    A.cuisine = c.value; her(c.label);
+    A.detail = c.value; her(c.label);
     await him(`${c.value}? Excellent taste. (You did pick me, so I already knew.) 😌`);
   } else await him("Ooh, I love that ✨ Anything with you is my favourite thing.");
 
   await him("When are you free? I already have my calendar open 📅 (ISTJ things)");
-  const suggest = {Coffee:"10:00", Dinner:"19:00", "Park & walk":"17:30"}[A.activity] || "18:00";
+  const suggest = {"Café date":"10:00", Dinner:"19:00", "Park & walk":"17:30", "Photo walk":"16:30"}[A.activity] || "18:00";
   const dt = await dateTimePicker(suggest);
   A.date = dt.date; A.time = dt.time;
   her(`${prettyDate(A.date)} at ${prettyTime(A.time)}`);
