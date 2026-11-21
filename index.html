@@ -807,11 +807,9 @@ function showDone(ok){
   $("#doneTitle").textContent = `It's a date, ${CONFIG.herName}!`;
   $("#sig").textContent = `Counting down the minutes. — ${A.with || CONFIG.hisAlias} (a.k.a. Thomas, Chong, In Chong & CIC) ♓`;
   const warn = $("#doneWarn");
-  const smsHref = `sms:${esc(CONFIG.phone)}${/iPhone|iPad/.test(navigator.userAgent)?"&":"?"}body=${encodeURIComponent(summaryText())}`;
   $("#doneReminder").innerHTML = ok ? `<div class="reminder"><div class="ic">💬</div><div>
       <b>One more thing: message him to confirm!</b>
-      <span>Send ${esc(A.with || CONFIG.hisAlias)} a little text so he knows it's official. He's waiting by his phone 🥹</span>
-      <a class="btn btn-primary" href="${smsHref}" style="margin-top:10px;padding:11px 18px;font-size:14px">Message him 💌</a></div></div>` : "";
+      <span>Send ${esc(A.with || CONFIG.hisAlias)} a little text so he knows it's official. He's waiting by his phone 🥹</span></div></div>` : "";
   if (ok){ warn.innerHTML = ""; $("#doneSub").textContent = "Your answer flew straight to his heart (and his phone)."; }
   else {
     $("#doneSub").textContent = "Almost there…";
