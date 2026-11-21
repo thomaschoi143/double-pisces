@@ -347,6 +347,7 @@ const PROFILES = [
       {t:"compat"},
       {t:"prompt", q:"My love language is", a:"taking care of my love, anytime. Booking made, umbrella packed, your favourite snack in my bag."},
       {t:"prompt", q:"I'm weirdly attracted to", a:"dreamers. Specifically INFPs. Specifically one."},
+      {t:"prompt", q:"Unpopular opinion (for a software engineer)", a:"AI shouldn't do everything. Handwritten notes, real film, slow conversations: the human stuff is the best stuff."},
       {t:"prompt", q:"Green flags I look for", a:"you write little notes, cry at movies, and believe in soulmates. (I do too, quietly.)"},
     ]},
   { name:"In Chong", emoji:"🌊", sub:"♓ Pisces · hopeless romantic",
@@ -355,6 +356,7 @@ const PROFILES = [
       {t:"zodiac"},
       {t:"prompt", q:"My love language is", a:"accompanying you, always. Errands, adventures, lazy days: wherever you are is where I want to be."},
       {t:"prompt", q:"Let's stay up late and", a:"have deep idea conversations: big questions, wild theories, the universe, us. Until the sun comes up."},
+      {t:"prompt", q:"Let's go exploring", a:"hidden laneways, a suburb we've never been to, a random train stop. Getting a little lost is more fun with you."},
       {t:"prompt", q:"A shower thought I recently had", a:"two Pisces = two fish swimming the same direction, forever."},
       {t:"prompt", q:"Typical Sunday", a:"Botanic Gardens with a matcha in one hand, a film camera in the other, and you as my favourite subject."},
     ]},
@@ -442,12 +444,13 @@ function blockHTML(b, i){
       return `<div class="card prompt"><div class="q">${esc(b.q)}</div><div class="a">${esc(b.a)}</div>${like}</div>`;
     case "vitals":
       return `<div class="card vitals">
-        <div class="row"><span class="chip">♓ Pisces</span><span class="chip">🧠 ISTJ</span><span class="chip">📍 Melbourne</span><span class="chip">🎞️ Film photography</span><span class="chip">📷 Digital photography</span><span class="chip">🗣️ Love-language fluent</span></div>
+        <div class="row"><span class="chip">♓ Pisces</span><span class="chip">🧠 ISTJ</span><span class="chip">📍 Melbourne</span><span class="chip">🎞️ Film photography</span><span class="chip">📷 Digital photography</span><span class="chip">🧭 Explorer</span><span class="chip">🗣️ Love-language fluent</span></div>
         <div class="line"><i>💼</i>Software Engineer</div>
         <div class="line"><i>🎓</i>The University of Melbourne</div>
         <div class="line"><i>🏠</i>Melbourne, VIC</div>
-        <div class="line"><i>📸</i>Interests: film &amp; digital photography, matcha, hot choco</div>
+        <div class="line"><i>📸</i>Interests: exploring, film &amp; digital photography, matcha, hot choco</div>
         <div class="line"><i>🔍</i>Looking for: you, specifically</div>
+        <div class="line"><i>✍️</i>Values: humanness, the real, imperfect, handmade kind</div>
         <div class="line"><i>💍</i>Intentions: forever, with a well-documented plan</div>
       </div>`;
     case "compat":
