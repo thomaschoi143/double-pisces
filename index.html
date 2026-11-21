@@ -238,6 +238,12 @@ textarea.field{resize:none;min-height:90px}
 #done .ticket{text-align:left;margin:0 0 18px;position:relative;z-index:1;align-self:stretch}
 .done-actions{display:flex;flex-direction:column;gap:10px;align-self:stretch;position:relative;z-index:1}
 .sig{font-family:"Playfair Display",serif;font-style:italic;font-size:18px;margin-top:22px;position:relative;z-index:1}
+.shake{animation:shake .45s}
+@keyframes shake{0%,100%{transform:none}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.reminder{display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border:1.5px dashed #F5A3B8;border-radius:16px;padding:14px 16px;margin:0 0 16px;position:relative;z-index:1;align-self:stretch;animation:bubbleIn .5s 1.2s both}
+.reminder .ic{font-size:26px;line-height:1;animation:beat 1.6s infinite}
+.reminder b{display:block;margin-bottom:2px}
+.reminder span{font-size:14px;color:var(--muted)}
 .warn{background:#FFF4E0;border:1px solid #F6D59B;color:#7A5413;border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:12px;text-align:left}
 
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -300,6 +306,7 @@ textarea.field{resize:none;min-height:90px}
     <h1 id="doneTitle">It's a date!</h1>
     <p id="doneSub">Your answer flew straight to his heart (and his phone).</p>
     <div id="doneWarn"></div>
+    <div id="doneReminder"></div>
     <div id="doneTicket" style="align-self:stretch"></div>
     <div class="done-actions">
       <a class="btn btn-rose" id="calBtn" target="_blank" rel="noopener">Add to my calendar 📅</a>
@@ -322,6 +329,9 @@ const CONFIG = {
   ntfyTopic: "double-pisces-date-4qtnlvs02ux6",
   phone: "",                        // your mobile, e.g. "+61400000000" — used for the "text him instead" fallback
   timezone: "Australia/Melbourne",
+  // Verification question she must answer before sending (she picks a month)
+  verifyQuestion: "Before I send this… what's our birthday month? 🎂",
+  verifyAnswer: "March",
   herPhoto: "",                     // optional: "her.jpg" for the match screen
   hisPhoto: "",                     // optional: "me.jpg" for match screen + chat avatar
 };
@@ -719,7 +729,39 @@ async function review(){
   msgs.insertAdjacentHTML("beforeend", ticketHTML()); scrollDown();
   composer.innerHTML = `<div class="rowx" style="margin-top:0"><button class="btn btn-ghost" id="redo">Start over</button><button class="btn btn-rose" id="send">Send it 💘</button></div>`;
   $("#redo").onclick = startChat;
-  $("#send").onclick = send;
+  $("#send").onclick = verify;
+}
+
+let wrongTries = 0;
+async function verify(){
+  clearComposer(); wrongTries = 0; tried.clear();
+  await him(CONFIG.verifyQuestion);
+  await him("Just making sure it's really you 🕵️‍♂️");
+  askVerify();
+}
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const tried = new Set();
+function askVerify(){
+  composer.innerHTML = `<div class="hint">Security check 🔐 Pick our birthday month</div>
+    <div class="chips" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${MONTHS.map((m,i)=>
+      `<button class="chip-btn" style="animation-delay:${i*30}ms;padding:10px 4px;font-size:14px${tried.has(m)?";opacity:.35;pointer-events:none;text-decoration:line-through":""}" data-m="${m}">${m.slice(0,3)}</button>`).join("")}</div>
+    <div class="rowx"><button class="btn btn-ghost" id="redo">Start over</button></div>`;
+  $("#redo").onclick = startChat;
+  composer.querySelectorAll("[data-m]").forEach(b => b.onclick = async () => {
+    const m = b.dataset.m;
+    if (m === CONFIG.verifyAnswer){
+      clearComposer(); her(m);
+      await him("Verified. It's really you 🥹💗");
+      return send();
+    }
+    tried.add(m); wrongTries++;
+    composer.classList.remove("shake"); void composer.offsetWidth; composer.classList.add("shake");
+    await sleep(450);
+    clearComposer(); her(m);
+    await him(wrongTries >= 3 ? "Hint: it's Pisces season, and spring is about to start up north 🌸"
+                              : pick(["Hmm… are you really you? 🤨 Try again", "Nope! Think harder, Pisces 🐟", "That's not it 🥲 One more try?"]));
+    askVerify();
+  });
 }
 
 /* ============================================================
@@ -735,7 +777,7 @@ function summaryText(){
 }
 
 async function send(){
-  const btn = $("#send"); btn.disabled = true; btn.textContent = "Sending with love…";
+  composer.innerHTML = `<div class="rowx" style="margin-top:0"><button class="btn btn-rose" disabled>Sending with love…</button></div>`;
   let ok = false;
   try {
     const url = `https://ntfy.sh/${encodeURIComponent(CONFIG.ntfyTopic)}?title=${encodeURIComponent("It's a date! 💘")}&tags=heart,love_letter&priority=high`;
@@ -765,6 +807,11 @@ function showDone(ok){
   $("#doneTitle").textContent = `It's a date, ${CONFIG.herName}!`;
   $("#sig").textContent = `Counting down the minutes. — ${A.with || CONFIG.hisAlias} (a.k.a. Thomas, Chong, In Chong & CIC) ♓`;
   const warn = $("#doneWarn");
+  const smsHref = `sms:${esc(CONFIG.phone)}${/iPhone|iPad/.test(navigator.userAgent)?"&":"?"}body=${encodeURIComponent(summaryText())}`;
+  $("#doneReminder").innerHTML = ok ? `<div class="reminder"><div class="ic">💬</div><div>
+      <b>One more thing: message him to confirm!</b>
+      <span>Send ${esc(A.with || CONFIG.hisAlias)} a little text so he knows it's official. He's waiting by his phone 🥹</span>
+      <a class="btn btn-primary" href="${smsHref}" style="margin-top:10px;padding:11px 18px;font-size:14px">Message him 💌</a></div></div>` : "";
   if (ok){ warn.innerHTML = ""; $("#doneSub").textContent = "Your answer flew straight to his heart (and his phone)."; }
   else {
     $("#doneSub").textContent = "Almost there…";
