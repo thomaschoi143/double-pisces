@@ -361,11 +361,11 @@ const PROFILES = [
       {t:"prompt", q:"A shower thought I recently had", a:"two Pisces = two fish swimming the same direction, forever."},
       {t:"prompt", q:"Typical Sunday", a:"Botanic Gardens with a matcha in one hand, a film camera in the other, and you as my favourite subject."},
     ]},
-  { name:"CIC", emoji:"💌", sub:"Fluent in every love language", last:true,
+  { name:"CIC", emoji:"💌", sub:"Loves in his own way", last:true,
     blocks:[
-      {t:"photo", src:"", emoji:"💌", grad:"linear-gradient(160deg,#FFC2D4,#F7799A 55%,#B83A6E)", cap:"Native speaker of yours"},
+      {t:"photo", src:"", emoji:"💌", grad:"linear-gradient(160deg,#FFC2D4,#F7799A 55%,#B83A6E)", cap:"Still learning your love language, by heart"},
       {t:"prompt", q:"My love language is", a:"hugs and kisses. The long kind of hug. The forehead kind of kiss. Many, many of both."},
-      {t:"prompt", q:"Also fluent in", a:"intimacy: the closeness where we don't need words at all."},
+      {t:"prompt", q:"I also love", a:"intimacy: the closeness where we don't need words at all."},
       {t:"prompt", q:"You should NOT go out with me if", a:"you don't want to be loved loudly, consistently, and on schedule."},
       {t:"twist"},
     ]},
@@ -445,7 +445,7 @@ function blockHTML(b, i){
       return `<div class="card prompt"><div class="q">${esc(b.q)}</div><div class="a">${esc(b.a)}</div>${like}</div>`;
     case "vitals":
       return `<div class="card vitals">
-        <div class="row"><span class="chip">♓ Pisces</span><span class="chip">🧠 ISTJ</span><span class="chip">📍 Melbourne</span><span class="chip">🎞️ Film photography</span><span class="chip">📷 Digital photography</span><span class="chip">🧭 Explorer</span><span class="chip">🗣️ Love-language fluent</span></div>
+        <div class="row"><span class="chip">♓ Pisces</span><span class="chip">🧠 ISTJ</span><span class="chip">📍 Melbourne</span><span class="chip">🎞️ Film photography</span><span class="chip">📷 Digital photography</span><span class="chip">🧭 Explorer</span><span class="chip">💞 Hopeless romantic</span></div>
         <div class="line"><i>💼</i>Software Engineer</div>
         <div class="line"><i>🎓</i>The University of Melbourne</div>
         <div class="line"><i>🏠</i>Melbourne, VIC</div>
@@ -464,7 +464,7 @@ function blockHTML(b, i){
         <div class="orbs"><div class="orb a" style="background:linear-gradient(135deg,#5FB4E8,#3A6FD1)"><div>♓<small>Him</small></div></div><div class="orb-heart">🌊</div><div class="orb b"><div>♓<small>You</small></div></div></div>
         <div class="big">Two dreamers, double the romance.<br><b style="color:var(--rose)">100% match</b></div>${like}</div>`;
     case "lovelang":
-      return `<div class="card ll"><h3>Love language report 💞</h3><div class="sub">Six love languages. Every one of them, just for you.</div>
+      return `<div class="card ll"><h3>My love languages 💞</h3><div class="sub">How much each one means to me. Still learning yours.</div>
         ${LOVE_LANGS.map(([l,w]) => `<div class="bar"><div class="lbl"><span>${l}</span><span>${w}%</span></div><div class="track"><div class="fill" style="--w:${w}%"></div></div></div>`).join("")}
         ${like}</div>`;
     case "twist":
@@ -477,7 +477,7 @@ function blockQuote(b){
   if (b.t === "photo") return `his photo: “${b.cap}”`;
   if (b.t === "compat") return "ISTJ × INFP: the planner & the dreamer";
   if (b.t === "zodiac") return "♓ × ♓: two fish, one ocean";
-  if (b.t === "lovelang") return "his love language report 💞";
+  if (b.t === "lovelang") return "his love languages 💞";
   return "his whole profile";
 }
 
