@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#FFF8F4">
-<title>two fish ♓</title>
+<title>Double Pisces ♓</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -70,7 +70,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    Splash
    ============================================================ */
 #splash{justify-content:center;align-items:center;text-align:center;padding:32px;background:radial-gradient(120% 80% at 50% 0%,#FFE6EE 0%,var(--bg) 60%)}
-.logo{font-family:"Playfair Display",serif;font-size:52px;font-weight:700;letter-spacing:-1px;position:relative;z-index:1}
+.logo{font-family:"Playfair Display",serif;font-size:clamp(34px,10.5vw,46px);white-space:nowrap;font-weight:700;letter-spacing:-1px;position:relative;z-index:1}
 .logo .fish{display:inline-block;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
 @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
 .tagline{color:var(--muted);margin:10px 0 40px;position:relative;z-index:1}
@@ -249,17 +249,17 @@ textarea.field{resize:none;min-height:90px}
   <!-- SPLASH -->
   <section class="screen active" id="splash">
     <div class="ambient" data-hearts="14"></div>
-    <div class="logo">two fish <span class="fish">♓</span></div>
-    <div class="tagline">The dating app with exactly one user.<br>Made for exactly one person.</div>
+    <div class="logo">Double Pisces <span class="fish">♓</span></div>
+    <div class="tagline">Where dreamers find each other.<br>Made for romantics, by romantics.</div>
     <button class="btn btn-primary" id="startBtn" style="position:relative;z-index:1">Find your match 💗</button>
-    <div class="splash-foot">1 new profile near you · Melbourne</div>
+    <div class="splash-foot">New profiles near you · Melbourne</div>
   </section>
 
   <!-- DISCOVER -->
   <section class="screen" id="discover">
     <div class="topbar">
-      <div class="brand">two fish <b>♓</b></div>
-      <div class="pill" id="counter">Profile 1 of 4</div>
+      <div class="brand">Double Pisces <b>♓</b></div>
+      <div class="pill">📍 Melbourne</div>
     </div>
     <div class="feed" id="feed"></div>
     <button class="pass" id="passBtn" aria-label="Pass">✕</button>
@@ -472,7 +472,6 @@ function blockQuote(b){
 
 function renderProfile(){
   const p = PROFILES[pIdx];
-  $("#counter").textContent = `Profile ${pIdx+1} of ${PROFILES.length}`;
   $("#feed").innerHTML = `<div class="profile in" id="profile">
     <div class="p-head"><div><div class="p-name">${esc(p.name)} <span class="verified">✓</span></div>
     <div class="p-sub"><span class="dot"></span> Active now · ${esc(p.sub)}</div></div></div>
@@ -492,11 +491,6 @@ $("#feed").addEventListener("click", e => {
   setTimeout(goMatch, 700);
 });
 
-const PASS_LINES = [
-  "Plot twist: the next one is also him 😌",
-  "Still him. Try again 💁‍♂️",
-  "You can run, but every profile is him 💘",
-];
 let dodges = 0;
 const DODGE_LINES = ["Nope, not happening 🙅‍♂️","Error 404: other options not found","The ✕ button is shy 🙈","OK fine, it's a heart now 💗"];
 
@@ -504,7 +498,7 @@ function pass(){
   const p = PROFILES[pIdx];
   if (p.last) return dodge();
   const el = $("#profile"); el.classList.add("out-left");
-  setTimeout(() => { pIdx++; renderProfile(); toast(PASS_LINES[(pIdx-1) % PASS_LINES.length]); }, 380);
+  setTimeout(() => { pIdx++; renderProfile(); }, 380);
 }
 function dodge(){
   const b = $("#passBtn");
@@ -731,7 +725,7 @@ async function send(){
     const res = await fetch(url, { method:"POST", body: summaryText() });
     ok = res.ok;
   } catch(e){ ok = false; }
-  try { localStorage.setItem("twofish-answer", JSON.stringify({...A, sentOK: ok})); } catch(e){}
+  try { localStorage.setItem("doublepisces-answer", JSON.stringify({...A, sentOK: ok})); } catch(e){}
   showDone(ok);
 }
 
@@ -775,7 +769,7 @@ function showDone(ok){
   setTimeout(() => burst(innerWidth/2, innerHeight*0.2, 30), 900);
 }
 
-$("#againBtn").onclick = () => { try{ localStorage.removeItem("twofish-answer"); }catch(e){} startChat(); };
+$("#againBtn").onclick = () => { try{ localStorage.removeItem("doublepisces-answer"); }catch(e){} startChat(); };
 
 /* ============================================================
    Start
@@ -784,7 +778,7 @@ $("#startBtn").addEventListener("click", () => { pIdx = 0; renderProfile(); show
 
 // if she already answered on this phone, show her date instead of starting over
 try {
-  const saved = JSON.parse(localStorage.getItem("twofish-answer") || "null");
+  const saved = JSON.parse(localStorage.getItem("doublepisces-answer") || "null");
   if (saved && saved.date){ Object.assign(A, saved); pIdx = PROFILES.length-1; showDone(saved.sentOK); }
 } catch(e){}
 </script>
