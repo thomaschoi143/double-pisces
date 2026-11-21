@@ -287,7 +287,7 @@ textarea.field{resize:none;min-height:90px}
   <section class="screen" id="chat">
     <div class="chat-head">
       <div class="av" id="chatAv">🐟</div>
-      <div><div class="nm" id="chatName">Theo</div><div class="st">● Active now · typing with butterflies</div></div>
+      <div><div class="nm" id="chatName">Thomas</div><div class="st">● Active now · typing with butterflies</div></div>
     </div>
     <div class="msgs" id="msgs"></div>
     <div class="composer" id="composer"></div>
@@ -316,7 +316,7 @@ textarea.field{resize:none;min-height:90px}
    ============================================================ */
 const CONFIG = {
   herName: "my love",               // what the site calls her
-  hisAlias: "Theo",                 // the name used in the chat & signature
+  hisAlias: "Thomas",               // fallback name (the chat uses whichever profile she liked)
   // ntfy.sh topic: install the "ntfy" app, subscribe to this exact topic name.
   // Anyone who knows the name can post to it, so keep it random.
   ntfyTopic: "two-fish-date-4qtnlvs02ux6",
@@ -329,35 +329,38 @@ const CONFIG = {
 // Every profile is you, under a different name, showing a different (real) side of you.
 // Put your own photos in `src` (e.g. "img/me-coffee.jpg"); empty = cute gradient placeholder.
 const PROFILES = [
-  { name:"Theo", emoji:"👨‍💻", sub:"Software Engineer · Melbourne",
+  { name:"Thomas", emoji:"👨‍💻", sub:"Software Engineer · Melbourne",
     blocks:[
       {t:"photo", src:"", emoji:"👨‍💻", grad:"linear-gradient(160deg,#FFB3C7,#FF6F91 55%,#C94B7D)", cap:"Shipping features by day, thinking about you by night"},
       {t:"prompt", q:"I go crazy for", a:"clean code, a perfect flat white, and you. Not in that order. You first."},
       {t:"vitals"},
+      {t:"lovelang"},
       {t:"photo", src:"", emoji:"🌉", grad:"linear-gradient(160deg,#C9B6FF,#8F7CFF 60%,#5B4BD6)", cap:"Melbourne born-and-debugged"},
       {t:"prompt", q:"Together, we could", a:"push a lifetime of slow Sunday mornings to production. Zero downtime."},
       {t:"prompt", q:"My most irrational fear", a:"a merge conflict on our anniversary."},
     ]},
-  { name:"Felix", emoji:"📋", sub:"ISTJ · The Planner · UniMelb grad",
+  { name:"Chong", emoji:"📋", sub:"ISTJ · The Planner · UniMelb grad",
     blocks:[
       {t:"photo", src:"", emoji:"📋", grad:"linear-gradient(160deg,#FFD3A5,#FD8C8C 55%,#E0568A)", cap:"Has a spreadsheet for our future (it's colour-coded)"},
       {t:"prompt", q:"The way to win me over is", a:"just show up. I've already planned the rest, down to the parking spot."},
       {t:"compat"},
+      {t:"prompt", q:"My love language is", a:"acts of service: the booking's made, the umbrella's packed, and your favourite snack is in my bag."},
       {t:"prompt", q:"I'm weirdly attracted to", a:"dreamers. Specifically INFPs. Specifically one."},
       {t:"prompt", q:"Green flags I look for", a:"you write little notes, cry at movies, and believe in soulmates. (I do too, quietly.)"},
     ]},
-  { name:"Kai", emoji:"🌊", sub:"♓ Pisces · hopeless romantic",
+  { name:"In Chong", emoji:"🌊", sub:"♓ Pisces · hopeless romantic",
     blocks:[
       {t:"photo", src:"", emoji:"🌊", grad:"linear-gradient(160deg,#A8E6FF,#5FB4E8 55%,#3A6FD1)", cap:"Two fish, one ocean"},
       {t:"zodiac"},
+      {t:"prompt", q:"My love language is", a:"quality time: phone face-down, all of me, all of you."},
       {t:"prompt", q:"A shower thought I recently had", a:"two Pisces = two fish swimming the same direction, forever."},
       {t:"prompt", q:"Typical Sunday", a:"Botanic Gardens, holding hands, pretending I'm not tearing up at the sunset."},
     ]},
-  { name:"Romeo", emoji:"💌", sub:"Fluent in every love language", last:true,
+  { name:"CIC", emoji:"💌", sub:"Fluent in every love language", last:true,
     blocks:[
       {t:"photo", src:"", emoji:"💌", grad:"linear-gradient(160deg,#FFC2D4,#F7799A 55%,#B83A6E)", cap:"Native speaker of yours"},
-      {t:"lovelang"},
-      {t:"prompt", q:"My love language is", a:"quality time: phone face-down, all of me, all of you."},
+      {t:"prompt", q:"My love language is", a:"words of affirmation: good-morning texts, good-night texts, and every reason I adore you in between."},
+      {t:"prompt", q:"Also fluent in", a:"physical touch: your hand in my coat pocket on a cold Melbourne night."},
       {t:"prompt", q:"You should NOT go out with me if", a:"you don't want to be loved loudly, consistently, and on schedule."},
       {t:"twist"},
     ]},
@@ -458,7 +461,7 @@ function blockHTML(b, i){
         ${like}</div>`;
     case "twist":
       return `<div class="card twist"><div class="q">Plot twist</div>
-        <div class="a">Theo, Felix, Kai and Romeo… were all me. There's no one else on this app. There never was. 🫶</div></div>`;
+        <div class="a">Thomas, Chong, In Chong, CIC… were all the same guy. And he's all yours. 🫶</div></div>`;
   }
 }
 function blockQuote(b){
@@ -586,19 +589,6 @@ function chips(options, {hint="", customPlaceholder="Type your idea…"} = {}){
   });
 }
 
-function multiChips(options, hint){
-  return new Promise(resolve => {
-    const on = new Set();
-    composer.innerHTML = `<div class="hint">${hint}</div><div class="chips">${options.map((o,i)=>`<button class="chip-btn" style="animation-delay:${i*50}ms" data-i="${i}">${esc(o)}</button>`).join("")}</div>
-      <div class="rowx"><button class="btn btn-rose" id="ok" disabled>That's the one 💞</button></div>`;
-    composer.querySelectorAll(".chip-btn").forEach(btn => btn.onclick = () => {
-      const i = +btn.dataset.i; on.has(i) ? on.delete(i) : on.add(i); btn.classList.toggle("on");
-      $("#ok").disabled = !on.size;
-    });
-    $("#ok").onclick = () => { clearComposer(); resolve([...on].sort().map(i => options[i])); };
-  });
-}
-
 const pad = n => String(n).padStart(2,"0");
 function todayISO(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function prettyDate(iso){ const [y,m,d]=iso.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"}); }
@@ -634,23 +624,23 @@ function notesInput(){
 
 function activityLabel(){ return A.activity + (A.cuisine ? ` · ${A.cuisine}` : ""); }
 function ticketHTML(){
-  return `<div class="ticket"><div class="top"><div class="k">Admit two · ${esc(CONFIG.hisAlias)} ♡ ${esc(CONFIG.herName)}</div><div class="t">Our date 💘</div></div>
+  return `<div class="ticket"><div class="top"><div class="k">Admit two · ${esc(A.with || CONFIG.hisAlias)} ♡ ${esc(CONFIG.herName)}</div><div class="t">Our date 💘</div></div>
     <div class="rows">
       <div class="r"><div class="k">Plan</div><div class="v">${esc(activityLabel())}</div></div>
       <div class="r"><div class="k">When</div><div class="v">${esc(prettyDate(A.date))}, ${esc(prettyTime(A.time))}</div></div>
-      <div class="r"><div class="k">Love lang.</div><div class="v">${esc(A.love.join(", "))}</div></div>
       ${A.notes ? `<div class="r"><div class="k">Her note</div><div class="v">${esc(A.notes)}</div></div>` : ""}
     </div></div>`;
 }
 
 async function startChat(){
   show("chat");
-  const p = PROFILES[pIdx];
-  $("#chatName").textContent = CONFIG.hisAlias;
-  setAvatar($("#chatAv"), CONFIG.hisPhoto, p.emoji);
-  msgs.innerHTML = `<div class="match-note">You matched with ${esc(CONFIG.hisAlias)} · just now 💘</div>`;
-  clearComposer();
   for (const k of Object.keys(A)) delete A[k];
+  const p = PROFILES[pIdx];
+  A.with = p.name;
+  $("#chatName").textContent = p.name;
+  setAvatar($("#chatAv"), CONFIG.hisPhoto, p.emoji);
+  msgs.innerHTML = `<div class="match-note">You matched with ${esc(p.name)} · just now 💘</div>`;
+  clearComposer();
   await sleep(500);
 
   await him(`Hi ${CONFIG.herName} 🥹 I was really hoping you'd like me back.`);
@@ -683,11 +673,6 @@ async function startChat(){
   her(`${prettyDate(A.date)} at ${prettyTime(A.time)}`);
   await him("Blocked out. Everything else cancelled. (There was nothing else. It was always you.) 🔒💗");
 
-  await him("Important question 💞 Which love language should this date speak?");
-  A.love = await multiChips(["⏳ Quality time","💬 Words of affirmation","🤗 Physical touch","🛠️ Acts of service","🎁 Little gifts","💯 All of them"], "Pick as many as you like");
-  her(A.love.join(" + "));
-  await him(A.love.some(l => l.includes("All")) ? "All five?! Challenge accepted. Prepare to be spoiled 🥰" : "Noted. I'll be fluent by then, I promise 🥰");
-
   await him("Anything else you'd like me to know? A wish, a dress code, a secret… 💌");
   A.notes = await notesInput();
   if (A.notes){ her(A.notes); await him("Saved to my heart (and backed up, obviously) 💾💗"); }
@@ -712,7 +697,6 @@ function summaryText(){
     `💘 She said yes!`,
     `Plan: ${activityLabel()}`,
     `When: ${prettyDate(A.date)}, ${prettyTime(A.time)}`,
-    `Love language: ${A.love.join(", ")}`,
     A.notes ? `Her note: ${A.notes}` : `Her note: (none, a mystery 😉)`,
   ].join("\n");
 }
@@ -735,9 +719,9 @@ function calendarLink(){
   const s = `${y}${m}${d}T${pad(h)}${pad(mi)}00`;
   const e = `${y}${m}${d}T${pad(Math.min(endH,23))}${pad(endH>23?59:mi)}00`;
   const q = new URLSearchParams({
-    action:"TEMPLATE", text:`Date with ${CONFIG.hisAlias} 💘 (${activityLabel()})`,
+    action:"TEMPLATE", text:`Date with ${A.with || CONFIG.hisAlias} 💘 (${activityLabel()})`,
     dates:`${s}/${e}`, ctz:CONFIG.timezone,
-    details:`Love language: ${A.love.join(", ")}${A.notes ? `\nMy note: ${A.notes}` : ""}`,
+    details: A.notes ? `My note: ${A.notes}` : "",
   });
   return `https://calendar.google.com/calendar/render?${q}`;
 }
@@ -746,7 +730,7 @@ function showDone(ok){
   $("#doneTicket").innerHTML = ticketHTML();
   $("#calBtn").href = calendarLink();
   $("#doneTitle").textContent = `It's a date, ${CONFIG.herName}!`;
-  $("#sig").textContent = `Counting down the minutes. — ${CONFIG.hisAlias} (and Felix, Kai & Romeo) ♓`;
+  $("#sig").textContent = `Counting down the minutes. — ${A.with || CONFIG.hisAlias} (a.k.a. Thomas, Chong, In Chong & CIC) ♓`;
   const warn = $("#doneWarn");
   if (ok){ warn.innerHTML = ""; $("#doneSub").textContent = "Your answer flew straight to his heart (and his phone)."; }
   else {
