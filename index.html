@@ -319,7 +319,7 @@ const CONFIG = {
   hisAlias: "Thomas",               // fallback name (the chat uses whichever profile she liked)
   // ntfy.sh topic: install the "ntfy" app, subscribe to this exact topic name.
   // Anyone who knows the name can post to it, so keep it random.
-  ntfyTopic: "two-fish-date-4qtnlvs02ux6",
+  ntfyTopic: "double-pisces-date-4qtnlvs02ux6",
   phone: "",                        // your mobile, e.g. "+61400000000" — used for the "text him instead" fallback
   timezone: "Australia/Melbourne",
   herPhoto: "",                     // optional: "her.jpg" for the match screen
@@ -353,12 +353,12 @@ const PROFILES = [
     ]},
   { name:"In Chong", emoji:"🌊", sub:"♓ Pisces · hopeless romantic",
     blocks:[
-      {t:"photo", src:"", emoji:"🌊", grad:"linear-gradient(160deg,#A8E6FF,#5FB4E8 55%,#3A6FD1)", cap:"Two fish, one ocean"},
+      {t:"photo", src:"", emoji:"🌊", grad:"linear-gradient(160deg,#A8E6FF,#5FB4E8 55%,#3A6FD1)", cap:"Double Pisces, double the romance"},
       {t:"zodiac"},
       {t:"prompt", q:"My love language is", a:"accompanying you, always. Errands, adventures, lazy days: wherever you are is where I want to be."},
       {t:"prompt", q:"Let's stay up late and", a:"have deep idea conversations: big questions, wild theories, the universe, us. Until the sun comes up."},
       {t:"prompt", q:"Let's go exploring", a:"hidden laneways, a suburb we've never been to, a random train stop. Getting a little lost is more fun with you."},
-      {t:"prompt", q:"A shower thought I recently had", a:"two Pisces = two fish swimming the same direction, forever."},
+      {t:"prompt", q:"A shower thought I recently had", a:"Double Pisces = two dreamers swimming the same direction, forever."},
       {t:"prompt", q:"Typical Sunday", a:"a picnic at Carlton Gardens. Matcha in one hand, film camera in the other, and you as my favourite subject."},
     ]},
   { name:"CIC", emoji:"💌", sub:"Loves in his own way", last:true,
@@ -476,7 +476,7 @@ function blockQuote(b){
   if (b.t === "prompt") return `“${b.a}”`;
   if (b.t === "photo") return `his photo: “${b.cap}”`;
   if (b.t === "compat") return "ISTJ × INFP: the planner & the dreamer";
-  if (b.t === "zodiac") return "♓ × ♓: two fish, one ocean";
+  if (b.t === "zodiac") return "♓ × ♓: Double Pisces";
   if (b.t === "lovelang") return "his love languages 💞";
   return "his whole profile";
 }
