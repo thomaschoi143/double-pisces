@@ -293,7 +293,8 @@ textarea.field{resize:none;min-height:90px}
   <section class="screen" id="chat">
     <div class="chat-head">
       <div class="av" id="chatAv">🐟</div>
-      <div><div class="nm" id="chatName">Thomas</div><div class="st">● Active now · typing with butterflies</div></div>
+      <div style="flex:1"><div class="nm" id="chatName">Thomas</div><div class="st">● Active now · typing with butterflies</div></div>
+      <button id="chatRestart" aria-label="Start over" style="font-size:20px;color:var(--muted);padding:6px 4px">↺</button>
     </div>
     <div class="msgs" id="msgs"></div>
     <div class="composer" id="composer"></div>
@@ -309,8 +310,8 @@ textarea.field{resize:none;min-height:90px}
     <div id="doneReminder"></div>
     <div id="doneTicket" style="align-self:stretch"></div>
     <div class="done-actions">
-      <a class="btn btn-rose" id="calBtn" target="_blank" rel="noopener">Add to my calendar 📅</a>
       <button class="btn btn-ghost" id="againBtn">Change my answer</button>
+      <button class="btn" id="restartBtn" style="color:var(--muted);font-size:14px;padding:10px">↺ Start over from the beginning</button>
     </div>
     <div class="sig" id="sig"></div>
   </section>
@@ -572,14 +573,30 @@ $("#toChat").addEventListener("click", startChat);
    Chat flow
    ============================================================ */
 const A = {}; // her answers
+let chatRun = 0; // bumps on restart so an old conversation stops talking
 const msgs = $("#msgs"), composer = $("#composer");
 const scrollDown = () => requestAnimationFrame(() => msgs.scrollTop = msgs.scrollHeight);
+// keep the latest message visible when the input area grows (month grid, notes box)
+// or the chat area shrinks (phone keyboard opening)
+if ("ResizeObserver" in window){ const ro = new ResizeObserver(scrollDown); ro.observe(msgs); ro.observe(composer); }
+// fit the app to the visible area when the on-screen keyboard opens/closes
+function fitViewport(){
+  if (window.visualViewport && innerWidth < 600){
+    $("#app").style.height = visualViewport.height + "px";
+    window.scrollTo(0, 0);
+  }
+  scrollDown();
+}
+if (window.visualViewport){ visualViewport.addEventListener("resize", fitViewport); visualViewport.addEventListener("scroll", fitViewport); }
+composer.addEventListener("focusin", () => setTimeout(fitViewport, 300));
 
 async function him(text){
+  const run = chatRun;
   const t = document.createElement("div"); t.className="typing"; t.innerHTML="<i></i><i></i><i></i>";
   msgs.appendChild(t); scrollDown();
   await sleep(Math.min(1500, 550 + text.length*14));
   t.remove();
+  if (run !== chatRun) throw new Error("restarted");
   const b = document.createElement("div"); b.className="bubble him"; b.textContent=text;
   msgs.appendChild(b); scrollDown(); await sleep(200);
 }
@@ -651,6 +668,7 @@ function ticketHTML(){
 }
 
 async function startChat(){
+  chatRun++;
   show("chat");
   for (const k of Object.keys(A)) delete A[k];
   const p = PROFILES[pIdx];
@@ -788,22 +806,8 @@ async function send(){
   showDone(ok);
 }
 
-function calendarLink(){
-  const [y,m,d] = A.date.split("-"), [h,mi] = A.time.split(":").map(Number);
-  const endH = h + 2;
-  const s = `${y}${m}${d}T${pad(h)}${pad(mi)}00`;
-  const e = `${y}${m}${d}T${pad(Math.min(endH,23))}${pad(endH>23?59:mi)}00`;
-  const q = new URLSearchParams({
-    action:"TEMPLATE", text:`Date with ${A.with || CONFIG.hisAlias} 💘 (${activityLabel()})`,
-    dates:`${s}/${e}`, ctz:CONFIG.timezone,
-    details: A.notes ? `My note: ${A.notes}` : "",
-  });
-  return `https://calendar.google.com/calendar/render?${q}`;
-}
-
 function showDone(ok){
   $("#doneTicket").innerHTML = ticketHTML();
-  $("#calBtn").href = calendarLink();
   $("#doneTitle").textContent = `It's a date, ${CONFIG.herName}!`;
   $("#sig").textContent = `Counting down the minutes. — ${A.with || CONFIG.hisAlias} (a.k.a. Thomas, Chong, In Chong & CIC) ♓`;
   const warn = $("#doneWarn");
@@ -831,6 +835,16 @@ function showDone(ok){
   setTimeout(() => burst(innerWidth/2, innerHeight*0.2, 30), 900);
 }
 
+function restartAll(){
+  if (!confirm("Start over from the very beginning?")) return;
+  try{ localStorage.removeItem("doublepisces-answer"); }catch(e){}
+  for (const k of Object.keys(A)) delete A[k];
+  chatRun++; msgs.innerHTML = ""; clearComposer();
+  pIdx = 0; likedText = "";
+  show("splash");
+}
+$("#restartBtn").onclick = restartAll;
+$("#chatRestart").onclick = restartAll;
 $("#againBtn").onclick = () => { try{ localStorage.removeItem("doublepisces-answer"); }catch(e){} startChat(); };
 
 /* ============================================================
