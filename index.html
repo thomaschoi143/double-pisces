@@ -661,13 +661,15 @@ async function startChat(){
   A.activity = act.value; her(act.label);
 
   if (A.activity === "Café date"){
-    await him("A cosy café and a long chat 🍵 What are we sipping?");
+    await him("A cosy café and a long chat 🍵 What are you having?");
     const d = await chips([
-      {label:"🫖 Chai latte", value:"Chai latte"}, {label:"🍵 Matcha", value:"Matcha"},
+      {label:"☕ Coffee", value:"Coffee"}, {label:"🫖 Chai latte", value:"Chai latte"}, {label:"🍵 Matcha", value:"Matcha"},
       {label:"🍫 Hot choco", value:"Hot choco"}, {label:"✨ Something else…", custom:true},
     ], {customPlaceholder:"e.g. bubble tea, hojicha, a cake…"});
     A.detail = d.value; her(d.label);
-    await him(`${d.value} for you, and I'm getting the same so we can match 🥹`);
+    await him(d.value === "Coffee"
+      ? "Coffee for you, chai latte for me ☕🫖 Different cups, perfect match."
+      : `${d.value} for you, and I'm getting the same so we can match 🥹`);
   }
   else if (A.activity === "Photo walk"){
     await him("Yesss 📸 Two cameras, one city, and I already know who my favourite subject is. What are we shooting on?");
