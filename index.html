@@ -344,7 +344,7 @@ const PROFILES = [
       {t:"photo", src:"", emoji:"📋", grad:"linear-gradient(160deg,#FFD3A5,#FD8C8C 55%,#E0568A)", cap:"Has a spreadsheet for our future (it's colour-coded)"},
       {t:"prompt", q:"The way to win me over is", a:"just show up. I've already planned the rest, down to the parking spot."},
       {t:"compat"},
-      {t:"prompt", q:"My love language is", a:"acts of service: the booking's made, the umbrella's packed, and your favourite snack is in my bag."},
+      {t:"prompt", q:"My love language is", a:"taking care of my love, anytime. Booking made, umbrella packed, your favourite snack in my bag."},
       {t:"prompt", q:"I'm weirdly attracted to", a:"dreamers. Specifically INFPs. Specifically one."},
       {t:"prompt", q:"Green flags I look for", a:"you write little notes, cry at movies, and believe in soulmates. (I do too, quietly.)"},
     ]},
@@ -352,23 +352,24 @@ const PROFILES = [
     blocks:[
       {t:"photo", src:"", emoji:"🌊", grad:"linear-gradient(160deg,#A8E6FF,#5FB4E8 55%,#3A6FD1)", cap:"Two fish, one ocean"},
       {t:"zodiac"},
-      {t:"prompt", q:"My love language is", a:"quality time: phone face-down, all of me, all of you."},
+      {t:"prompt", q:"My love language is", a:"accompanying you, always. Errands, adventures, lazy days: wherever you are is where I want to be."},
+      {t:"prompt", q:"Let's stay up late and", a:"deep talk: dreams, fears, the universe, us. Until the sun comes up."},
       {t:"prompt", q:"A shower thought I recently had", a:"two Pisces = two fish swimming the same direction, forever."},
       {t:"prompt", q:"Typical Sunday", a:"Botanic Gardens, holding hands, pretending I'm not tearing up at the sunset."},
     ]},
   { name:"CIC", emoji:"💌", sub:"Fluent in every love language", last:true,
     blocks:[
       {t:"photo", src:"", emoji:"💌", grad:"linear-gradient(160deg,#FFC2D4,#F7799A 55%,#B83A6E)", cap:"Native speaker of yours"},
-      {t:"prompt", q:"My love language is", a:"words of affirmation: good-morning texts, good-night texts, and every reason I adore you in between."},
-      {t:"prompt", q:"Also fluent in", a:"physical touch: your hand in my coat pocket on a cold Melbourne night."},
+      {t:"prompt", q:"My love language is", a:"hugs and kisses. The long kind of hug. The forehead kind of kiss. Many, many of both."},
+      {t:"prompt", q:"Also fluent in", a:"intimacy: the closeness where we don't need words at all."},
       {t:"prompt", q:"You should NOT go out with me if", a:"you don't want to be loved loudly, consistently, and on schedule."},
       {t:"twist"},
     ]},
 ];
 
 const LOVE_LANGS = [
-  ["⏳ Quality time", 96], ["🛠️ Acts of service", 92], ["🤗 Physical touch", 90],
-  ["💬 Words of affirmation", 86], ["🎁 Receiving gifts", 74],
+  ["🫶 Take care of my love, anytime", 100], ["👫 Accompany you, always", 100],
+  ["🌙 Deep talks", 98], ["🤗 Hugs", 99], ["💋 Kisses", 99], ["💏 Intimacy", 97],
 ];
 
 /* ============================================================
@@ -456,7 +457,7 @@ function blockHTML(b, i){
         <div class="orbs"><div class="orb a" style="background:linear-gradient(135deg,#5FB4E8,#3A6FD1)"><div>♓<small>Him</small></div></div><div class="orb-heart">🌊</div><div class="orb b"><div>♓<small>You</small></div></div></div>
         <div class="big">Two dreamers, double the romance.<br><b style="color:var(--rose)">100% match</b></div>${like}</div>`;
     case "lovelang":
-      return `<div class="card ll"><h3>Love language report 💞</h3><div class="sub">Fluent in all five. Ready to learn yours by heart.</div>
+      return `<div class="card ll"><h3>Love language report 💞</h3><div class="sub">Six love languages. Every one of them, just for you.</div>
         ${LOVE_LANGS.map(([l,w]) => `<div class="bar"><div class="lbl"><span>${l}</span><span>${w}%</span></div><div class="track"><div class="fill" style="--w:${w}%"></div></div></div>`).join("")}
         ${like}</div>`;
     case "twist":
