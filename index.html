@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#FFF8F4">
+<title>two fish ♓</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Colours
+   ============================================================ */
+:root{
+  --bg:#FFF8F4;
+  --card:#FFFFFF;
+  --ink:#1E1A1C;
+  --muted:#7A6F74;
+  --line:#EFE4E4;
+  --rose:#E8436E;
+  --rose-deep:#C42D57;
+  --blush:#FFE1E8;
+  --lav:#EFE7FF;
+  --gold:#F6B85B;
+  --shadow:0 6px 24px rgba(120,40,70,.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.45;
+  overflow:hidden;
+}
+.serif{font-family:"Playfair Display",Georgia,serif}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+
+/* phone-sized app; on desktop it's shown in a frame so you can test */
+.app{position:relative;width:100%;max-width:430px;height:100dvh;margin:0 auto;overflow:hidden;background:var(--bg)}
+@media (min-width:600px){
+  body{display:grid;place-items:center;background:#F3E6EA}
+  .app{height:min(900px,calc(100dvh - 40px));border-radius:36px;box-shadow:0 30px 80px rgba(120,40,70,.25);border:10px solid #1E1A1C}
+}
+
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:scale(.98);transition:opacity .45s ease,transform .45s ease}
+.screen.active{opacity:1;pointer-events:auto;transform:none}
+
+/* ============================================================
+   Floating hearts (ambient + tap)
+   ============================================================ */
+.ambient{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.ambient span{position:absolute;bottom:-40px;animation:floatUp linear infinite;opacity:.0}
+@keyframes floatUp{
+  0%{transform:translateY(0) translateX(0) rotate(0);opacity:0}
+  10%{opacity:.9}
+  100%{transform:translateY(-110vh) translateX(var(--drift,20px)) rotate(var(--rot,20deg));opacity:0}
+}
+.tap-heart{position:fixed;pointer-events:none;z-index:999;font-size:22px;animation:tapHeart 1s ease-out forwards}
+@keyframes tapHeart{
+  0%{transform:translate(-50%,-50%) scale(.3);opacity:1}
+  100%{transform:translate(calc(-50% + var(--dx)),calc(-50% - 90px)) scale(1.3) rotate(var(--r));opacity:0}
+}
+.burst{position:fixed;pointer-events:none;z-index:999;font-size:20px;animation:burst .9s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes burst{
+  0%{transform:translate(-50%,-50%) scale(.2);opacity:1}
+  100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1);opacity:0}
+}
+
+/* ============================================================
+   Splash
+   ============================================================ */
+#splash{justify-content:center;align-items:center;text-align:center;padding:32px;background:radial-gradient(120% 80% at 50% 0%,#FFE6EE 0%,var(--bg) 60%)}
+.logo{font-family:"Playfair Display",serif;font-size:52px;font-weight:700;letter-spacing:-1px;position:relative;z-index:1}
+.logo .fish{display:inline-block;color:var(--rose);animation:beat 1.4s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
+.tagline{color:var(--muted);margin:10px 0 40px;position:relative;z-index:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:16px 28px;border-radius:999px;font-weight:600;font-size:16px;transition:transform .15s ease,box-shadow .2s ease,opacity .2s}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--ink);color:#fff;box-shadow:0 8px 24px rgba(30,26,28,.25)}
+.btn-rose{background:linear-gradient(135deg,#FF6F91,var(--rose));color:#fff;box-shadow:0 10px 26px rgba(232,67,110,.35)}
+.btn-ghost{background:#fff;border:1.5px solid var(--line)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.splash-foot{position:absolute;bottom:28px;left:0;right:0;font-size:13px;color:var(--muted);z-index:1}
+
+/* ============================================================
+   Discover (profile)
+   ============================================================ */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;position:relative;z-index:2;background:var(--bg)}
+.topbar .brand{font-family:"Playfair Display",serif;font-weight:700;font-size:24px}
+.topbar .brand b{color:var(--rose)}
+.pill{font-size:12px;font-weight:600;padding:6px 10px;border-radius:999px;background:var(--blush);color:var(--rose-deep)}
+.feed{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 14px 120px;scroll-behavior:smooth}
+.profile{touch-action:pan-y;will-change:transform}
+.profile.out-left{transition:transform .45s ease,opacity .45s;transform:translateX(-120%) rotate(-12deg);opacity:0}
+.profile.out-right{transition:transform .45s ease,opacity .45s;transform:translateX(120%) rotate(12deg);opacity:0}
+.profile.in{animation:slideIn .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes slideIn{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+.p-head{display:flex;align-items:flex-end;justify-content:space-between;padding:6px 4px 12px}
+.p-name{font-family:"Playfair Display",serif;font-size:32px;font-weight:700;line-height:1.1}
+.p-sub{font-size:13px;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:#3CC48A;display:inline-block;box-shadow:0 0 0 3px rgba(60,196,138,.2)}
+.verified{color:#6C5CE7;font-size:18px}
+
+.card{position:relative;background:var(--card);border-radius:18px;margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden}
+.photo{aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;font-size:110px;background-size:cover;background-position:center}
+.photo .cap{position:absolute;left:14px;bottom:14px;right:70px;color:#fff;font-weight:600;font-size:15px;text-shadow:0 2px 10px rgba(0,0,0,.35)}
+.photo .emoji{filter:drop-shadow(0 10px 20px rgba(0,0,0,.18));animation:bob 4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.prompt{padding:26px 22px 30px}
+.prompt .q{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:10px}
+.prompt .a{font-family:"Playfair Display",serif;font-size:25px;line-height:1.25;padding-right:36px}
+.like{position:absolute;right:12px;bottom:12px;width:50px;height:50px;border-radius:50%;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.14);display:grid;place-items:center;font-size:22px;transition:transform .2s}
+.like:active{transform:scale(.85)}
+.like.liked{animation:likePop .5s ease}
+@keyframes likePop{0%{transform:scale(1)}40%{transform:scale(1.5)}100%{transform:scale(1)}}
+
+.vitals{padding:6px 0}
+.vitals .row{display:flex;gap:10px;overflow-x:auto;padding:12px 18px;border-bottom:1px solid var(--line);scrollbar-width:none}
+.vitals .row::-webkit-scrollbar{display:none}
+.vitals .chip{flex:none;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500;padding-right:12px;border-right:1px solid var(--line)}
+.vitals .chip:last-child{border-right:0}
+.vitals .line{display:flex;gap:12px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--line);font-size:15px}
+.vitals .line:last-child{border-bottom:0}
+.vitals .line i{font-style:normal;width:22px;text-align:center}
+
+.ll{padding:22px 20px 24px}
+.ll h3,.compat h3{margin:0 0 4px;font-family:"Playfair Display",serif;font-size:22px}
+.ll .sub,.compat .sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+.bar{margin:12px 0}
+.bar .lbl{display:flex;justify-content:space-between;font-size:14px;font-weight:500;margin-bottom:6px}
+.bar .track{height:10px;background:var(--blush);border-radius:99px;overflow:hidden}
+.bar .fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#FF9AB2,var(--rose));transition:width 1.3s cubic-bezier(.2,.8,.2,1)}
+.ll.seen .fill{width:var(--w)}
+
+.compat{padding:22px 20px 26px;text-align:center;background:linear-gradient(160deg,#fff 0%,#FFF1F5 100%)}
+.orbs{display:flex;justify-content:center;align-items:center;margin:16px 0 14px}
+.orb{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:18px;color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.orb small{display:block;font-weight:500;font-size:11px;opacity:.9}
+.orb.a{background:linear-gradient(135deg,#7F8CFF,#5B4BD6);margin-right:-14px}
+.orb.b{background:linear-gradient(135deg,#FF9AB2,#E8436E);margin-left:-14px}
+.orb-heart{position:relative;z-index:2;width:42px;height:42px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:20px;box-shadow:0 4px 14px rgba(0,0,0,.15);animation:beat 1.4s infinite}
+.compat .big{font-family:"Playfair Display",serif;font-size:20px;line-height:1.3}
+
+.twist{padding:30px 22px;text-align:center;background:linear-gradient(160deg,#2A1E24,#4A2236);color:#fff}
+.twist .q{color:#FFB3C7;font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.twist .a{font-family:"Playfair Display",serif;font-size:24px;margin-top:10px;line-height:1.3}
+
+.pass{position:absolute;left:18px;bottom:calc(22px + env(safe-area-inset-bottom));width:62px;height:62px;border-radius:50%;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,.18);font-size:26px;display:grid;place-items:center;z-index:5;transition:transform .35s cubic-bezier(.3,1.6,.5,1),background .3s}
+.pass.heart{background:var(--rose);color:#fff}
+.swipe-hint{position:absolute;right:18px;bottom:calc(36px + env(safe-area-inset-bottom));font-size:12px;color:var(--muted);background:#fff;padding:8px 12px;border-radius:99px;box-shadow:var(--shadow);z-index:5;animation:nudge 2.4s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+.stamp{position:fixed;top:30%;font-family:"Playfair Display",serif;font-size:40px;font-weight:700;padding:6px 16px;border:4px solid;border-radius:12px;opacity:0;pointer-events:none;z-index:20;transition:opacity .1s}
+.stamp.like-s{left:30px;color:var(--rose);transform:rotate(-14deg)}
+.stamp.nope-s{right:30px;color:#888;transform:rotate(14deg)}
+
+.toast{position:absolute;left:50%;top:70px;transform:translate(-50%,-20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:500;opacity:0;transition:all .35s;z-index:50;width:max-content;max-width:86%;text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ============================================================
+   Match
+   ============================================================ */
+#match{justify-content:center;align-items:center;text-align:center;padding:30px;background:linear-gradient(170deg,#FF8FAB 0%,#E8436E 55%,#A8285A 100%);color:#fff}
+#match h1{font-family:"Playfair Display",serif;font-style:italic;font-size:54px;margin:0;position:relative;z-index:1;text-shadow:0 6px 30px rgba(0,0,0,.2)}
+#match.active h1{animation:pop .8s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.pair{display:flex;justify-content:center;align-items:center;margin:34px 0 26px;position:relative;z-index:1}
+.avatar{width:120px;height:120px;border-radius:50%;border:5px solid #fff;display:grid;place-items:center;font-size:56px;background:#FFE1E8;box-shadow:0 14px 30px rgba(0,0,0,.2);background-size:cover;background-position:center}
+#match.active .avatar.l{animation:fromL .9s cubic-bezier(.2,1.2,.4,1) both}
+#match.active .avatar.r{animation:fromR .9s cubic-bezier(.2,1.2,.4,1) both}
+@keyframes fromL{from{transform:translateX(-120px) rotate(-20deg);opacity:0}to{transform:translateX(14px) rotate(-6deg)}}
+@keyframes fromR{from{transform:translateX(120px) rotate(20deg);opacity:0}to{transform:translateX(-14px) rotate(6deg)}}
+.pair .mid{position:absolute;z-index:2;width:54px;height:54px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:26px;animation:beat 1.2s infinite;box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.liked-quote{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);padding:14px 16px;border-radius:16px;font-size:15px;margin-bottom:12px;position:relative;z-index:1;backdrop-filter:blur(6px)}
+.match-sub{font-size:15px;opacity:.95;margin:0 0 28px;position:relative;z-index:1}
+#match .btn{background:#fff;color:var(--rose-deep);position:relative;z-index:1;width:100%}
+
+/* ============================================================
+   Chat
+   ============================================================ */
+.chat-head{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:#fff;z-index:2}
+.chat-head .av{width:42px;height:42px;border-radius:50%;background:var(--blush);display:grid;place-items:center;font-size:22px;background-size:cover;background-position:center}
+.chat-head .nm{font-weight:700}
+.chat-head .st{font-size:12px;color:#3CC48A;font-weight:500}
+.msgs{flex:1;overflow-y:auto;padding:18px 14px 10px;display:flex;flex-direction:column;gap:8px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+.match-note{text-align:center;font-size:12px;color:var(--muted);margin:4px 0 10px}
+.bubble{max-width:80%;padding:11px 15px;border-radius:20px;font-size:15.5px;animation:bubbleIn .35s cubic-bezier(.2,1.2,.4,1);word-wrap:break-word;white-space:pre-wrap}
+@keyframes bubbleIn{from{transform:translateY(10px) scale(.92);opacity:0}to{transform:none;opacity:1}}
+.bubble.him{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:6px}
+.bubble.her{align-self:flex-end;background:linear-gradient(135deg,#FF6F91,var(--rose));color:#fff;border-bottom-right-radius:6px}
+.typing{align-self:flex-start;background:#fff;border:1px solid var(--line);border-radius:20px;border-bottom-left-radius:6px;padding:14px 16px;display:flex;gap:5px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#D6A3B4;animation:typing 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes typing{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+
+.ticket{align-self:stretch;margin:6px 4px;background:#fff;border-radius:18px;box-shadow:var(--shadow);overflow:hidden;animation:bubbleIn .5s cubic-bezier(.2,1.2,.4,1)}
+.ticket .top{background:linear-gradient(135deg,#FF8FAB,var(--rose));color:#fff;padding:16px 18px}
+.ticket .top .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.ticket .top .t{font-family:"Playfair Display",serif;font-size:24px;font-weight:700}
+.ticket .perf{height:0;border-top:2px dashed var(--line);margin:0 14px;position:relative}
+.ticket .rows{padding:12px 18px 16px}
+.ticket .r{display:flex;gap:12px;padding:7px 0;font-size:14.5px}
+.ticket .r .k{width:92px;flex:none;color:var(--muted)}
+.ticket .r .v{font-weight:600;white-space:pre-wrap;word-break:break-word}
+
+.composer{padding:12px 14px calc(14px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line);z-index:2}
+.composer .hint{font-size:12px;color:var(--muted);margin:0 2px 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip-btn{padding:11px 15px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:500;font-size:15px;transition:all .2s;animation:bubbleIn .35s both}
+.chip-btn:active{transform:scale(.95)}
+.chip-btn.on{border-color:var(--rose);background:var(--blush);color:var(--rose-deep)}
+.field{width:100%;padding:13px 15px;border-radius:14px;border:1.5px solid var(--line);font:inherit;font-size:16px;background:#fff;color:var(--ink);outline:none;transition:border .2s}
+.field:focus{border-color:var(--rose)}
+textarea.field{resize:none;min-height:90px}
+.rowx{display:flex;gap:8px;margin-top:10px}
+.rowx .btn{flex:1;padding:14px 16px}
+.dt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dt-grid label{font-size:12px;color:var(--muted);font-weight:600;display:block;margin:0 0 4px 4px}
+.time-chips{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px;scrollbar-width:none}
+.time-chips::-webkit-scrollbar{display:none}
+.time-chips .chip-btn{flex:none;font-size:13.5px;padding:9px 12px}
+
+/* ============================================================
+   Done
+   ============================================================ */
+#done{align-items:center;text-align:center;padding:40px 24px 30px;overflow-y:auto;background:radial-gradient(120% 70% at 50% 0%,#FFE1E8 0%,var(--bg) 65%)}
+.envelope{position:relative;width:170px;height:118px;margin:20px auto 30px;z-index:1}
+.envelope .body{position:absolute;inset:0;background:#FFD0DC;border-radius:10px;box-shadow:0 16px 36px rgba(200,60,100,.25)}
+.envelope .flap{position:absolute;left:0;right:0;top:0;height:70px;background:#FFB9CA;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;border-radius:10px 10px 0 0}
+.envelope .letter{position:absolute;left:14px;right:14px;top:10px;height:96px;background:#fff;border-radius:6px;display:grid;place-items:center;font-size:30px;transition:transform 1s .6s cubic-bezier(.2,1,.3,1)}
+.envelope .seal{position:absolute;left:50%;top:52px;transform:translate(-50%,-50%);font-size:34px;z-index:3;animation:beat 1.3s infinite}
+#done.active .envelope .flap{animation:openFlap .8s .3s forwards}
+#done.active .envelope .letter{transform:translateY(-60px)}
+#done.active .envelope .seal{animation:sealOff .5s .1s forwards}
+@keyframes openFlap{to{transform:rotateX(180deg);z-index:0}}
+@keyframes sealOff{to{transform:translate(-50%,-50%) scale(0);opacity:0}}
+#done h1{font-family:"Playfair Display",serif;font-size:40px;margin:0 0 6px;position:relative;z-index:1}
+#done p{color:var(--muted);margin:0 0 20px;position:relative;z-index:1}
+#done .ticket{text-align:left;margin:0 0 18px;position:relative;z-index:1;align-self:stretch}
+.done-actions{display:flex;flex-direction:column;gap:10px;align-self:stretch;position:relative;z-index:1}
+.sig{font-family:"Playfair Display",serif;font-style:italic;font-size:18px;margin-top:22px;position:relative;z-index:1}
+.warn{background:#FFF4E0;border:1px solid #F6D59B;color:#7A5413;border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:12px;text-align:left}
+
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- SPLASH -->
+  <section class="screen active" id="splash">
+    <div class="ambient" data-hearts="14"></div>
+    <div class="logo">two fish <span class="fish">♓</span></div>
+    <div class="tagline">The dating app with exactly one user.<br>Made for exactly one person.</div>
+    <button class="btn btn-primary" id="startBtn" style="position:relative;z-index:1">Find your match 💗</button>
+    <div class="splash-foot">1 new profile near you · Melbourne</div>
+  </section>
+
+  <!-- DISCOVER -->
+  <section class="screen" id="discover">
+    <div class="topbar">
+      <div class="brand">two fish <b>♓</b></div>
+      <div class="pill" id="counter">Profile 1 of 4</div>
+    </div>
+    <div class="feed" id="feed"></div>
+    <button class="pass" id="passBtn" aria-label="Pass">✕</button>
+    <div class="swipe-hint">swipe → or tap ♡</div>
+    <div class="stamp like-s" id="stampLike">LIKE</div>
+    <div class="stamp nope-s" id="stampNope">NOPE</div>
+    <div class="toast" id="toast"></div>
+  </section>
+
+  <!-- MATCH -->
+  <section class="screen" id="match">
+    <div class="ambient" data-hearts="20" data-white="1"></div>
+    <h1>It's a match!</h1>
+    <div class="pair">
+      <div class="avatar l" id="herAvatar">🌷</div>
+      <div class="mid">💘</div>
+      <div class="avatar r" id="hisAvatar">🐟</div>
+    </div>
+    <div class="liked-quote" id="likedQuote"></div>
+    <p class="match-sub">♓ × ♓ · ISTJ × INFP · 100% compatible</p>
+    <button class="btn" id="toChat">Plan our first date 💌</button>
+  </section>
+
+  <!-- CHAT -->
+  <section class="screen" id="chat">
+    <div class="chat-head">
+      <div class="av" id="chatAv">🐟</div>
+      <div><div class="nm" id="chatName">Theo</div><div class="st">● Active now · typing with butterflies</div></div>
+    </div>
+    <div class="msgs" id="msgs"></div>
+    <div class="composer" id="composer"></div>
+  </section>
+
+  <!-- DONE -->
+  <section class="screen" id="done">
+    <div class="ambient" data-hearts="18"></div>
+    <div class="envelope"><div class="body"></div><div class="letter">💌</div><div class="flap"></div><div class="seal">❤️</div></div>
+    <h1 id="doneTitle">It's a date!</h1>
+    <p id="doneSub">Your answer flew straight to his heart (and his phone).</p>
+    <div id="doneWarn"></div>
+    <div id="doneTicket" style="align-self:stretch"></div>
+    <div class="done-actions">
+      <a class="btn btn-rose" id="calBtn" target="_blank" rel="noopener">Add to my calendar 📅</a>
+      <button class="btn btn-ghost" id="againBtn">Change my answer</button>
+    </div>
+    <div class="sig" id="sig"></div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   ✏️  EDIT THESE
+   ============================================================ */
+const CONFIG = {
+  herName: "my love",               // what the site calls her
+  hisAlias: "Theo",                 // the name used in the chat & signature
+  // ntfy.sh topic: install the "ntfy" app, subscribe to this exact topic name.
+  // Anyone who knows the name can post to it, so keep it random.
+  ntfyTopic: "two-fish-date-4qtnlvs02ux6",
+  phone: "",                        // your mobile, e.g. "+61400000000" — used for the "text him instead" fallback
+  timezone: "Australia/Melbourne",
+  herPhoto: "",                     // optional: "her.jpg" for the match screen
+  hisPhoto: "",                     // optional: "me.jpg" for match screen + chat avatar
+};
+
+// Every profile is you, under a different name, showing a different (real) side of you.
+// Put your own photos in `src` (e.g. "img/me-coffee.jpg"); empty = cute gradient placeholder.
+const PROFILES = [
+  { name:"Theo", emoji:"👨‍💻", sub:"Software Engineer · Melbourne",
+    blocks:[
+      {t:"photo", src:"", emoji:"👨‍💻", grad:"linear-gradient(160deg,#FFB3C7,#FF6F91 55%,#C94B7D)", cap:"Shipping features by day, thinking about you by night"},
+      {t:"prompt", q:"I go crazy for", a:"clean code, a perfect flat white, and you. Not in that order. You first."},
+      {t:"vitals"},
+      {t:"photo", src:"", emoji:"🌉", grad:"linear-gradient(160deg,#C9B6FF,#8F7CFF 60%,#5B4BD6)", cap:"Melbourne born-and-debugged"},
+      {t:"prompt", q:"Together, we could", a:"push a lifetime of slow Sunday mornings to production. Zero downtime."},
+      {t:"prompt", q:"My most irrational fear", a:"a merge conflict on our anniversary."},
+    ]},
+  { name:"Felix", emoji:"📋", sub:"ISTJ · The Planner · UniMelb grad",
+    blocks:[
+      {t:"photo", src:"", emoji:"📋", grad:"linear-gradient(160deg,#FFD3A5,#FD8C8C 55%,#E0568A)", cap:"Has a spreadsheet for our future (it's colour-coded)"},
+      {t:"prompt", q:"The way to win me over is", a:"just show up. I've already planned the rest, down to the parking spot."},
+      {t:"compat"},
+      {t:"prompt", q:"I'm weirdly attracted to", a:"dreamers. Specifically INFPs. Specifically one."},
+      {t:"prompt", q:"Green flags I look for", a:"you write little notes, cry at movies, and believe in soulmates. (I do too, quietly.)"},
+    ]},
+  { name:"Kai", emoji:"🌊", sub:"♓ Pisces · hopeless romantic",
+    blocks:[
+      {t:"photo", src:"", emoji:"🌊", grad:"linear-gradient(160deg,#A8E6FF,#5FB4E8 55%,#3A6FD1)", cap:"Two fish, one ocean"},
+      {t:"zodiac"},
+      {t:"prompt", q:"A shower thought I recently had", a:"two Pisces = two fish swimming the same direction, forever."},
+      {t:"prompt", q:"Typical Sunday", a:"Botanic Gardens, holding hands, pretending I'm not tearing up at the sunset."},
+    ]},
+  { name:"Romeo", emoji:"💌", sub:"Fluent in every love language", last:true,
+    blocks:[
+      {t:"photo", src:"", emoji:"💌", grad:"linear-gradient(160deg,#FFC2D4,#F7799A 55%,#B83A6E)", cap:"Native speaker of yours"},
+      {t:"lovelang"},
+      {t:"prompt", q:"My love language is", a:"quality time: phone face-down, all of me, all of you."},
+      {t:"prompt", q:"You should NOT go out with me if", a:"you don't want to be loved loudly, consistently, and on schedule."},
+      {t:"twist"},
+    ]},
+];
+
+const LOVE_LANGS = [
+  ["⏳ Quality time", 96], ["🛠️ Acts of service", 92], ["🤗 Physical touch", 90],
+  ["💬 Words of affirmation", 86], ["🎁 Receiving gifts", 74],
+];
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const HEARTS = ["💗","💖","💕","💘","❤️","🩷","💞"];
+const rand = (a,b) => a + Math.random()*(b-a);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+}
+
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function burst(x, y, n=14){
+  for(let i=0;i<n;i++){
+    const h = document.createElement("div");
+    h.className = "burst"; h.textContent = pick(HEARTS);
+    const a = (Math.PI*2*i)/n + rand(-.3,.3), d = rand(60,130);
+    h.style.left = x+"px"; h.style.top = y+"px";
+    h.style.setProperty("--dx", Math.cos(a)*d+"px"); h.style.setProperty("--dy", Math.sin(a)*d+"px");
+    h.style.fontSize = rand(14,26)+"px";
+    document.body.appendChild(h); setTimeout(() => h.remove(), 950);
+  }
+}
+
+// ambient floating hearts
+document.querySelectorAll(".ambient").forEach(el => {
+  const n = +el.dataset.hearts, white = el.dataset.white;
+  for(let i=0;i<n;i++){
+    const s = document.createElement("span");
+    s.textContent = white ? pick(["🤍","💗","✨","🩷"]) : pick(HEARTS.concat(["✨","🌸"]));
+    s.style.left = rand(0,100)+"%"; s.style.fontSize = rand(14,30)+"px";
+    s.style.animationDuration = rand(7,14)+"s"; s.style.animationDelay = rand(0,10)+"s";
+    s.style.setProperty("--drift", rand(-60,60)+"px"); s.style.setProperty("--rot", rand(-40,40)+"deg");
+    el.appendChild(s);
+  }
+});
+
+// little heart wherever she taps
+document.addEventListener("pointerdown", e => {
+  if (e.target.closest("input,textarea,.composer")) return;
+  const h = document.createElement("div");
+  h.className = "tap-heart"; h.textContent = pick(HEARTS);
+  h.style.left = e.clientX+"px"; h.style.top = e.clientY+"px";
+  h.style.setProperty("--dx", rand(-30,30)+"px"); h.style.setProperty("--r", rand(-30,30)+"deg");
+  document.body.appendChild(h); setTimeout(() => h.remove(), 1000);
+});
+
+/* ============================================================
+   Profiles
+   ============================================================ */
+let pIdx = 0, likedText = "";
+
+function blockHTML(b, i){
+  const like = `<button class="like" data-like="${i}" aria-label="Like">🤍</button>`;
+  switch(b.t){
+    case "photo":
+      return `<div class="card photo" style="background:${b.src ? `url('${esc(b.src)}') center/cover` : b.grad}">
+        ${b.src ? "" : `<span class="emoji">${b.emoji}</span>`}<div class="cap">${esc(b.cap)}</div>${like}</div>`;
+    case "prompt":
+      return `<div class="card prompt"><div class="q">${esc(b.q)}</div><div class="a">${esc(b.a)}</div>${like}</div>`;
+    case "vitals":
+      return `<div class="card vitals">
+        <div class="row"><span class="chip">♓ Pisces</span><span class="chip">🧠 ISTJ</span><span class="chip">📍 Melbourne</span><span class="chip">🗣️ Love-language fluent</span></div>
+        <div class="line"><i>💼</i>Software Engineer</div>
+        <div class="line"><i>🎓</i>The University of Melbourne</div>
+        <div class="line"><i>🏠</i>Melbourne, VIC</div>
+        <div class="line"><i>🔍</i>Looking for: you, specifically</div>
+        <div class="line"><i>💍</i>Intentions: forever, with a well-documented plan</div>
+      </div>`;
+    case "compat":
+      return `<div class="card compat"><h3>Personality match</h3><div class="sub">Calculated with 100% scientific bias</div>
+        <div class="orbs"><div class="orb a"><div>ISTJ<small>Logistician</small></div></div><div class="orb-heart">💞</div><div class="orb b"><div>INFP<small>Mediator</small></div></div></div>
+        <div class="big">The planner &amp; the dreamer.<br>I'll book the table; you'll make it a story.</div>${like}</div>`;
+    case "zodiac":
+      return `<div class="card compat"><h3>Zodiac compatibility</h3><div class="sub">Pisces ♓ (him) × Pisces ♓ (you)</div>
+        <div class="orbs"><div class="orb a" style="background:linear-gradient(135deg,#5FB4E8,#3A6FD1)"><div>♓<small>Him</small></div></div><div class="orb-heart">🌊</div><div class="orb b"><div>♓<small>You</small></div></div></div>
+        <div class="big">Two dreamers, double the romance.<br><b style="color:var(--rose)">100% match</b></div>${like}</div>`;
+    case "lovelang":
+      return `<div class="card ll"><h3>Love language report 💞</h3><div class="sub">Fluent in all five. Ready to learn yours by heart.</div>
+        ${LOVE_LANGS.map(([l,w]) => `<div class="bar"><div class="lbl"><span>${l}</span><span>${w}%</span></div><div class="track"><div class="fill" style="--w:${w}%"></div></div></div>`).join("")}
+        ${like}</div>`;
+    case "twist":
+      return `<div class="card twist"><div class="q">Plot twist</div>
+        <div class="a">Theo, Felix, Kai and Romeo… were all me. There's no one else on this app. There never was. 🫶</div></div>`;
+  }
+}
+function blockQuote(b){
+  if (b.t === "prompt") return `“${b.a}”`;
+  if (b.t === "photo") return `his photo: “${b.cap}”`;
+  if (b.t === "compat") return "ISTJ × INFP: the planner & the dreamer";
+  if (b.t === "zodiac") return "♓ × ♓: two fish, one ocean";
+  if (b.t === "lovelang") return "his love language report 💞";
+  return "his whole profile";
+}
+
+function renderProfile(){
+  const p = PROFILES[pIdx];
+  $("#counter").textContent = `Profile ${pIdx+1} of ${PROFILES.length}`;
+  $("#feed").innerHTML = `<div class="profile in" id="profile">
+    <div class="p-head"><div><div class="p-name">${esc(p.name)} <span class="verified">✓</span></div>
+    <div class="p-sub"><span class="dot"></span> Active now · ${esc(p.sub)}</div></div></div>
+    ${p.blocks.map(blockHTML).join("")}</div>`;
+  $("#feed").scrollTop = 0;
+  const ll = $("#feed .ll");
+  if (ll) new IntersectionObserver((ents, o) => ents.forEach(en => { if (en.isIntersecting){ ll.classList.add("seen"); o.disconnect(); } }), {threshold:.4}).observe(ll);
+  bindSwipe($("#profile"));
+  resetPass();
+}
+
+$("#feed").addEventListener("click", e => {
+  const btn = e.target.closest("[data-like]"); if (!btn) return;
+  btn.textContent = "❤️"; btn.classList.add("liked");
+  const r = btn.getBoundingClientRect(); burst(r.left+r.width/2, r.top+r.height/2, 16);
+  likedText = blockQuote(PROFILES[pIdx].blocks[+btn.dataset.like]);
+  setTimeout(goMatch, 700);
+});
+
+const PASS_LINES = [
+  "Plot twist: the next one is also him 😌",
+  "Still him. Try again 💁‍♂️",
+  "You can run, but every profile is him 💘",
+];
+let dodges = 0;
+const DODGE_LINES = ["Nope, not happening 🙅‍♂️","Error 404: other options not found","The ✕ button is shy 🙈","OK fine, it's a heart now 💗"];
+
+function pass(){
+  const p = PROFILES[pIdx];
+  if (p.last) return dodge();
+  const el = $("#profile"); el.classList.add("out-left");
+  setTimeout(() => { pIdx++; renderProfile(); toast(PASS_LINES[(pIdx-1) % PASS_LINES.length]); }, 380);
+}
+function dodge(){
+  const b = $("#passBtn");
+  if (b.classList.contains("heart")){ const r=b.getBoundingClientRect(); burst(r.left+31,r.top+31,18); likedText = "his whole profile (the ✕ button gave up) 💗"; return setTimeout(goMatch, 600); }
+  toast(DODGE_LINES[Math.min(dodges, DODGE_LINES.length-1)]);
+  dodges++;
+  if (dodges >= DODGE_LINES.length){ b.style.transform = ""; b.classList.add("heart"); b.textContent = "♥"; return; }
+  b.style.transform = `translate(${rand(40,260)}px, ${rand(-380,-60)}px) rotate(${rand(-25,25)}deg)`;
+}
+function resetPass(){ const b=$("#passBtn"); b.classList.remove("heart"); b.textContent="✕"; b.style.transform=""; dodges=0; }
+$("#passBtn").addEventListener("click", pass);
+
+function bindSwipe(el){
+  let sx=0, sy=0, dx=0, drag=false, active=false;
+  const sL=$("#stampLike"), sN=$("#stampNope");
+  el.addEventListener("pointerdown", e => { if (e.target.closest("button")) return; sx=e.clientX; sy=e.clientY; dx=0; active=true; drag=false; });
+  el.addEventListener("pointermove", e => {
+    if (!active) return;
+    dx = e.clientX - sx; const dy = e.clientY - sy;
+    if (!drag && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy)*1.2) drag = true;
+    if (!drag) return;
+    el.style.transform = `translateX(${dx}px) rotate(${dx/22}deg)`;
+    sL.style.opacity = Math.max(0, Math.min(1, dx/100)); sN.style.opacity = Math.max(0, Math.min(1, -dx/100));
+  });
+  const end = () => {
+    if (!active) return; active=false; sL.style.opacity=0; sN.style.opacity=0;
+    if (!drag) return;
+    if (dx > 100){ el.classList.add("out-right"); burst(innerWidth/2, innerHeight/2, 22); likedText = "his whole profile (swiped right!) 💗"; setTimeout(goMatch, 400); }
+    else if (dx < -100){ el.style.transform=""; if (PROFILES[pIdx].last){ el.style.transition="transform .4s"; dodge(); setTimeout(()=>el.style.transition="",400);} else pass(); }
+    else { el.style.transition="transform .3s"; el.style.transform=""; setTimeout(()=>el.style.transition="",300); }
+  };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+}
+
+/* ============================================================
+   Match
+   ============================================================ */
+function setAvatar(el, src, fallback){ if (src){ el.style.backgroundImage=`url('${src}')`; el.textContent=""; } else el.textContent = fallback; }
+function goMatch(){
+  const p = PROFILES[pIdx];
+  setAvatar($("#hisAvatar"), CONFIG.hisPhoto, p.emoji);
+  setAvatar($("#herAvatar"), CONFIG.herPhoto, "🌷");
+  $("#likedQuote").textContent = `You liked ${likedText}`;
+  show("match");
+  setTimeout(() => { burst(innerWidth/2, innerHeight*0.42, 26); }, 500);
+}
+$("#toChat").addEventListener("click", startChat);
+
+/* ============================================================
+   Chat flow
+   ============================================================ */
+const A = {}; // her answers
+const msgs = $("#msgs"), composer = $("#composer");
+const scrollDown = () => requestAnimationFrame(() => msgs.scrollTop = msgs.scrollHeight);
+
+async function him(text){
+  const t = document.createElement("div"); t.className="typing"; t.innerHTML="<i></i><i></i><i></i>";
+  msgs.appendChild(t); scrollDown();
+  await sleep(Math.min(1500, 550 + text.length*14));
+  t.remove();
+  const b = document.createElement("div"); b.className="bubble him"; b.textContent=text;
+  msgs.appendChild(b); scrollDown(); await sleep(200);
+}
+function her(text){
+  const b = document.createElement("div"); b.className="bubble her"; b.textContent=text;
+  msgs.appendChild(b); scrollDown();
+  const r = b.getBoundingClientRect(); burst(r.right-20, r.top+r.height/2, 8);
+}
+function clearComposer(){ composer.innerHTML=""; }
+
+function chips(options, {hint="", customPlaceholder="Type your idea…"} = {}){
+  return new Promise(resolve => {
+    composer.innerHTML = `${hint?`<div class="hint">${hint}</div>`:""}<div class="chips">${options.map((o,i)=>`<button class="chip-btn" style="animation-delay:${i*50}ms" data-i="${i}">${esc(o.label)}</button>`).join("")}</div>`;
+    composer.querySelectorAll(".chip-btn").forEach(btn => btn.onclick = () => {
+      const o = options[+btn.dataset.i];
+      if (!o.custom){ clearComposer(); return resolve(o); }
+      composer.innerHTML = `<div class="hint">${esc(o.label)}</div><input class="field" id="cust" maxlength="120" placeholder="${esc(customPlaceholder)}">
+        <div class="rowx"><button class="btn btn-ghost" id="back">Back</button><button class="btn btn-rose" id="ok" disabled>Send 💗</button></div>`;
+      const inp = $("#cust"), ok = $("#ok"); inp.focus();
+      inp.oninput = () => ok.disabled = !inp.value.trim();
+      inp.onkeydown = e => { if (e.key==="Enter" && inp.value.trim()) ok.click(); };
+      $("#back").onclick = () => chips(options, {hint, customPlaceholder}).then(resolve);
+      ok.onclick = () => { const v = inp.value.trim(); clearComposer(); resolve({label:v, value:v, isCustom:true}); };
+    });
+  });
+}
+
+function multiChips(options, hint){
+  return new Promise(resolve => {
+    const on = new Set();
+    composer.innerHTML = `<div class="hint">${hint}</div><div class="chips">${options.map((o,i)=>`<button class="chip-btn" style="animation-delay:${i*50}ms" data-i="${i}">${esc(o)}</button>`).join("")}</div>
+      <div class="rowx"><button class="btn btn-rose" id="ok" disabled>That's the one 💞</button></div>`;
+    composer.querySelectorAll(".chip-btn").forEach(btn => btn.onclick = () => {
+      const i = +btn.dataset.i; on.has(i) ? on.delete(i) : on.add(i); btn.classList.toggle("on");
+      $("#ok").disabled = !on.size;
+    });
+    $("#ok").onclick = () => { clearComposer(); resolve([...on].sort().map(i => options[i])); };
+  });
+}
+
+const pad = n => String(n).padStart(2,"0");
+function todayISO(){ const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function prettyDate(iso){ const [y,m,d]=iso.split("-").map(Number); return new Date(y,m-1,d).toLocaleDateString("en-AU",{weekday:"long",day:"numeric",month:"long"}); }
+function prettyTime(t){ let [h,m]=t.split(":").map(Number); const ap=h>=12?"pm":"am"; h=h%12||12; return `${h}:${pad(m)} ${ap}`; }
+
+function dateTimePicker(suggest){
+  return new Promise(resolve => {
+    const times = [["☕ Morning","10:00"],["🥪 Lunch","12:30"],["🌅 Golden hour","17:30"],["🕯️ Dinner","19:00"],["🌙 Late","20:30"]];
+    composer.innerHTML = `<div class="dt-grid">
+        <div><label>Day</label><input class="field" type="date" id="d" min="${todayISO()}"></div>
+        <div><label>Time</label><input class="field" type="time" id="t" value="${suggest}"></div>
+      </div>
+      <div class="time-chips">${times.map(([l,v])=>`<button class="chip-btn${v===suggest?" on":""}" data-v="${v}">${l}</button>`).join("")}</div>
+      <div class="rowx"><button class="btn btn-rose" id="ok" disabled>Lock it in 🔒</button></div>`;
+    const d=$("#d"), t=$("#t"), ok=$("#ok");
+    const check = () => ok.disabled = !(d.value && t.value);
+    d.oninput = check; t.oninput = () => { composer.querySelectorAll(".time-chips .chip-btn").forEach(b=>b.classList.toggle("on", b.dataset.v===t.value)); check(); };
+    composer.querySelectorAll(".time-chips .chip-btn").forEach(b => b.onclick = () => { t.value=b.dataset.v; t.oninput(); });
+    ok.onclick = () => { clearComposer(); resolve({date:d.value, time:t.value}); };
+  });
+}
+
+function notesInput(){
+  return new Promise(resolve => {
+    composer.innerHTML = `<textarea class="field" id="n" maxlength="600" placeholder="A wish, a dress code, a secret, anything… 💌"></textarea>
+      <div class="rowx"><button class="btn btn-ghost" id="skip">Skip</button><button class="btn btn-rose" id="ok" disabled>Send note 💌</button></div>`;
+    const n=$("#n"), ok=$("#ok");
+    n.oninput = () => ok.disabled = !n.value.trim();
+    $("#skip").onclick = () => { clearComposer(); resolve(""); };
+    ok.onclick = () => { const v=n.value.trim(); clearComposer(); resolve(v); };
+  });
+}
+
+function activityLabel(){ return A.activity + (A.cuisine ? ` · ${A.cuisine}` : ""); }
+function ticketHTML(){
+  return `<div class="ticket"><div class="top"><div class="k">Admit two · ${esc(CONFIG.hisAlias)} ♡ ${esc(CONFIG.herName)}</div><div class="t">Our date 💘</div></div>
+    <div class="rows">
+      <div class="r"><div class="k">Plan</div><div class="v">${esc(activityLabel())}</div></div>
+      <div class="r"><div class="k">When</div><div class="v">${esc(prettyDate(A.date))}, ${esc(prettyTime(A.time))}</div></div>
+      <div class="r"><div class="k">Love lang.</div><div class="v">${esc(A.love.join(", "))}</div></div>
+      ${A.notes ? `<div class="r"><div class="k">Her note</div><div class="v">${esc(A.notes)}</div></div>` : ""}
+    </div></div>`;
+}
+
+async function startChat(){
+  show("chat");
+  const p = PROFILES[pIdx];
+  $("#chatName").textContent = CONFIG.hisAlias;
+  setAvatar($("#chatAv"), CONFIG.hisPhoto, p.emoji);
+  msgs.innerHTML = `<div class="match-note">You matched with ${esc(CONFIG.hisAlias)} · just now 💘</div>`;
+  clearComposer();
+  for (const k of Object.keys(A)) delete A[k];
+  await sleep(500);
+
+  await him(`Hi ${CONFIG.herName} 🥹 I was really hoping you'd like me back.`);
+  await him("So… can I take you on a date? What sounds perfect to you?");
+  const act = await chips([
+    {label:"☕ Coffee", value:"Coffee"},
+    {label:"🍝 Dinner", value:"Dinner"},
+    {label:"🌳 Park & walk", value:"Park & walk"},
+    {label:"✨ Something else…", custom:true},
+  ], {customPlaceholder:"e.g. picnic, movie, beach, museum…"});
+  A.activity = act.value; her(act.label);
+
+  if (A.activity === "Coffee") await him("A slow coffee and a long talk ☕ My favourite kind of morning.");
+  else if (A.activity === "Park & walk") await him("Holding hands, golden hour, nowhere to be 🌳🌅 Perfect.");
+  else if (A.activity === "Dinner"){
+    await him("Candlelight mode: activated 🕯️ What are you craving?");
+    const c = await chips([
+      {label:"🥟 Chinese", value:"Chinese"}, {label:"🍜 Thai", value:"Thai"}, {label:"🥘 Korean", value:"Korean"},
+      {label:"🍣 Japanese", value:"Japanese"}, {label:"🍝 Pasta", value:"Pasta"}, {label:"🍕 Pizza", value:"Pizza"},
+      {label:"🥂 Fine dining", value:"Fine dining"}, {label:"✨ Something else…", custom:true},
+    ], {customPlaceholder:"e.g. Vietnamese, hot pot, Mexican…"});
+    A.cuisine = c.value; her(c.label);
+    await him(`${c.value}? Excellent taste. (You did pick me, so I already knew.) 😌`);
+  } else await him("Ooh, I love that ✨ Anything with you is my favourite thing.");
+
+  await him("When are you free? I already have my calendar open 📅 (ISTJ things)");
+  const suggest = {Coffee:"10:00", Dinner:"19:00", "Park & walk":"17:30"}[A.activity] || "18:00";
+  const dt = await dateTimePicker(suggest);
+  A.date = dt.date; A.time = dt.time;
+  her(`${prettyDate(A.date)} at ${prettyTime(A.time)}`);
+  await him("Blocked out. Everything else cancelled. (There was nothing else. It was always you.) 🔒💗");
+
+  await him("Important question 💞 Which love language should this date speak?");
+  A.love = await multiChips(["⏳ Quality time","💬 Words of affirmation","🤗 Physical touch","🛠️ Acts of service","🎁 Little gifts","💯 All of them"], "Pick as many as you like");
+  her(A.love.join(" + "));
+  await him(A.love.some(l => l.includes("All")) ? "All five?! Challenge accepted. Prepare to be spoiled 🥰" : "Noted. I'll be fluent by then, I promise 🥰");
+
+  await him("Anything else you'd like me to know? A wish, a dress code, a secret… 💌");
+  A.notes = await notesInput();
+  if (A.notes){ her(A.notes); await him("Saved to my heart (and backed up, obviously) 💾💗"); }
+  else await him("Mystery it is. I like that 😉");
+
+  await review();
+}
+
+async function review(){
+  await him("Here's our date. Look right?");
+  msgs.insertAdjacentHTML("beforeend", ticketHTML()); scrollDown();
+  composer.innerHTML = `<div class="rowx" style="margin-top:0"><button class="btn btn-ghost" id="redo">Start over</button><button class="btn btn-rose" id="send">Send it 💘</button></div>`;
+  $("#redo").onclick = startChat;
+  $("#send").onclick = send;
+}
+
+/* ============================================================
+   Sending (ntfy.sh push notification, no server needed)
+   ============================================================ */
+function summaryText(){
+  return [
+    `💘 She said yes!`,
+    `Plan: ${activityLabel()}`,
+    `When: ${prettyDate(A.date)}, ${prettyTime(A.time)}`,
+    `Love language: ${A.love.join(", ")}`,
+    A.notes ? `Her note: ${A.notes}` : `Her note: (none, a mystery 😉)`,
+  ].join("\n");
+}
+
+async function send(){
+  const btn = $("#send"); btn.disabled = true; btn.textContent = "Sending with love…";
+  let ok = false;
+  try {
+    const url = `https://ntfy.sh/${encodeURIComponent(CONFIG.ntfyTopic)}?title=${encodeURIComponent("It's a date! 💘")}&tags=heart,love_letter&priority=high`;
+    const res = await fetch(url, { method:"POST", body: summaryText() });
+    ok = res.ok;
+  } catch(e){ ok = false; }
+  try { localStorage.setItem("twofish-answer", JSON.stringify({...A, sentOK: ok})); } catch(e){}
+  showDone(ok);
+}
+
+function calendarLink(){
+  const [y,m,d] = A.date.split("-"), [h,mi] = A.time.split(":").map(Number);
+  const endH = h + 2;
+  const s = `${y}${m}${d}T${pad(h)}${pad(mi)}00`;
+  const e = `${y}${m}${d}T${pad(Math.min(endH,23))}${pad(endH>23?59:mi)}00`;
+  const q = new URLSearchParams({
+    action:"TEMPLATE", text:`Date with ${CONFIG.hisAlias} 💘 (${activityLabel()})`,
+    dates:`${s}/${e}`, ctz:CONFIG.timezone,
+    details:`Love language: ${A.love.join(", ")}${A.notes ? `\nMy note: ${A.notes}` : ""}`,
+  });
+  return `https://calendar.google.com/calendar/render?${q}`;
+}
+
+function showDone(ok){
+  $("#doneTicket").innerHTML = ticketHTML();
+  $("#calBtn").href = calendarLink();
+  $("#doneTitle").textContent = `It's a date, ${CONFIG.herName}!`;
+  $("#sig").textContent = `Counting down the minutes. — ${CONFIG.hisAlias} (and Felix, Kai & Romeo) ♓`;
+  const warn = $("#doneWarn");
+  if (ok){ warn.innerHTML = ""; $("#doneSub").textContent = "Your answer flew straight to his heart (and his phone)."; }
+  else {
+    $("#doneSub").textContent = "Almost there…";
+    const body = encodeURIComponent(summaryText());
+    warn.innerHTML = `<div class="warn">The love letter got lost in the internet 🥲 Tap below to send it to him directly.</div>
+      <div class="done-actions" style="margin-bottom:14px">
+        <a class="btn btn-primary" href="sms:${esc(CONFIG.phone)}${/iPhone|iPad/.test(navigator.userAgent)?"&":"?"}body=${body}">Text it to him 💬</a>
+        <button class="btn btn-ghost" id="copyBtn">Copy my answer</button>
+        <button class="btn btn-ghost" id="retryBtn">Try sending again</button>
+      </div>`;
+    $("#copyBtn").onclick = async () => { try { await navigator.clipboard.writeText(summaryText()); $("#copyBtn").textContent = "Copied 💗"; } catch(e){} };
+    $("#retryBtn").onclick = async () => {
+      $("#retryBtn").textContent = "Sending…";
+      try { const r = await fetch(`https://ntfy.sh/${encodeURIComponent(CONFIG.ntfyTopic)}?title=${encodeURIComponent("It's a date! 💘")}&tags=heart,love_letter&priority=high`, {method:"POST", body:summaryText()}); if (r.ok) return showDone(true); } catch(e){}
+      $("#retryBtn").textContent = "Still lost… try texting him 💬";
+    };
+  }
+  show("done");
+  setTimeout(() => burst(innerWidth/2, innerHeight*0.2, 30), 900);
+}
+
+$("#againBtn").onclick = () => { try{ localStorage.removeItem("twofish-answer"); }catch(e){} startChat(); };
+
+/* ============================================================
+   Start
+   ============================================================ */
+$("#startBtn").addEventListener("click", () => { pIdx = 0; renderProfile(); show("discover"); });
+
+// if she already answered on this phone, show her date instead of starting over
+try {
+  const saved = JSON.parse(localStorage.getItem("twofish-answer") || "null");
+  if (saved && saved.date){ Object.assign(A, saved); pIdx = PROFILES.length-1; showDone(saved.sentOK); }
+} catch(e){}
+</script>
+</body>
+</html>
